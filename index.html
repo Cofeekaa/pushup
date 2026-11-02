@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Отжимания против монстров</title>
+<meta name="theme-color" content="#120d17">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Rubik:wght@400;500;700&display=swap">
+<style>
+/* Арена в подземелье: камера на весь экран, сверху табло матча (вы — таймер — монстр), монстр в центре, управление внизу. Одна тёмная тема намеренно. */
+:root{
+  --stone:#120d17; --stone-2:#1e1625; --stone-3:#2c2234;
+  --bone:#f3eadb; --dim:#a99db0;
+  --ember:#ff7a1a; --blood:#e8323c; --life:#3ddc84; --gold:#ffc83d;
+  --display:"Russo One","Arial Black",Impact,sans-serif;
+  --body:"Rubik",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--stone);color:var(--bone);font:16px/1.45 var(--body);overflow:hidden;-webkit-tap-highlight-color:transparent;user-select:none}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+[hidden]{display:none!important}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance;letter-spacing:.01em}
+
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;overflow-y:auto;
+  padding-top:max(16px,env(safe-area-inset-top,0px));padding-bottom:max(16px,env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{width:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.label{font:500 12px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--ember)}
+
+/* ---------- меню ---------- */
+#menu{background:radial-gradient(120% 70% at 50% 0%,#3a1d2a 0%,var(--stone) 60%)}
+.logo{display:flex;flex-direction:column;gap:6px;padding-top:8px}
+.logo h1{font-size:clamp(30px,9vw,44px);line-height:1.02}
+.logo p{margin:0;color:var(--dim)}
+
+.prog{background:var(--stone-2);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.prog .nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.prog .nums b{display:block;font:24px var(--display);color:var(--gold);font-variant-numeric:tabular-nums}
+.prog .nums span{font-size:12px;color:var(--dim)}
+.chart{display:flex;align-items:flex-end;gap:4px;height:64px;border-bottom:1px solid #4a3b52}
+.chart i{flex:1;min-width:0;background:#5a4566;border-radius:3px 3px 0 0;position:relative}
+.chart i.win{background:var(--life)}
+.chart i.best{background:var(--gold)}
+.chart-empty{color:var(--dim);font-size:13px;margin:0}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--dim)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;background:var(--c)}
+
+.foes{display:flex;flex-direction:column;gap:6px}
+.foe{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:12px;padding:8px 12px;background:var(--stone-2);border-radius:10px;text-align:left;border:2px solid transparent}
+.foe .em{font-size:30px;text-align:center}
+.foe b{display:block;font-weight:500}
+.foe span{color:var(--dim);font-size:13px}
+.foe .pace{font:14px var(--display);color:var(--blood);white-space:nowrap;font-variant-numeric:tabular-nums}
+.foe.sel{border-color:var(--ember);background:var(--stone-3)}
+.foe.locked{opacity:.45}
+.foe.beaten .pace{color:var(--life)}
+
+.howto{background:var(--stone-2);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.howto h3{font-size:16px;color:var(--gold)}
+.howto ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.howto svg{width:100%;height:auto;display:block}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opts label{display:flex;flex-direction:column;gap:4px;color:var(--dim);font-size:13px}
+.opts .chk{flex-direction:row;align-items:center;gap:8px;grid-column:1/-1}
+select{background:var(--stone-3);color:var(--bone);border:1px solid #4a3b52;border-radius:8px;padding:8px;font:inherit;width:100%}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--ember)}
+.btn{display:block;width:100%;padding:16px;border-radius:12px;font:20px var(--display);text-align:center}
+.btn.primary{background:var(--ember);color:#1a0d02;box-shadow:0 4px 0 #a5450a}
+.btn.primary:active{transform:translateY(3px);box-shadow:0 1px 0 #a5450a}
+.btn.ghost{border:2px solid var(--stone-3);color:var(--bone);font-size:16px;padding:12px}
+.note{color:var(--dim);font-size:13px;margin:0}
+.err{background:#3b1418;border:1px solid var(--blood);border-radius:10px;padding:10px 12px;font-size:14px}
+
+/* ---------- бой ---------- */
+#battle{padding:0;overflow:hidden;background:#000}
+#cam,#skel{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+#cam{filter:saturate(.75) brightness(.7)}
+#battle.nocam{background:radial-gradient(90% 60% at 50% 40%,#3a1d2a,var(--stone))}
+.hud{position:absolute;left:0;right:0;top:0;padding-top:max(10px,env(safe-area-inset-top,0px));
+  padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));z-index:3}
+.board{max-width:520px;margin:0 auto;background:rgba(18,13,23,.9);border:1px solid #3a2d42;border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.board .row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
+.side{display:flex;align-items:center;gap:8px;min-width:0}
+.side.r{flex-direction:row-reverse;text-align:right}
+.side .em{font-size:28px;line-height:1}
+.side small{display:block;color:var(--dim);font-size:11px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.side b{font:30px/1 var(--display);font-variant-numeric:tabular-nums}
+.side.me b{color:var(--life)} .side.foe-s b{color:var(--blood)}
+.side>div{min-width:0}
+.timer{font:26px var(--display);font-variant-numeric:tabular-nums;text-align:center}
+.timer.low{color:var(--blood);animation:pulse .5s infinite alternate}
+.tug{position:relative;height:14px;border-radius:7px;background:var(--blood);overflow:hidden}
+.tug i{position:absolute;inset:0 auto 0 0;width:50%;background:var(--life);transition:width .3s ease-out}
+.tug::after{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;background:rgba(255,255,255,.7)}
+
+.arena{position:absolute;left:0;right:0;top:20%;height:34%;display:grid;place-items:center;z-index:2;pointer-events:none}
+.monster{font-size:min(30vw,170px);line-height:1;filter:drop-shadow(0 10px 20px rgba(0,0,0,.6));transform-origin:50% 100%}
+.monster.idle{animation:breathe 2.4s ease-in-out infinite}
+.monster.push{animation:push .45s ease-in-out}
+.monster.hit{animation:hit .35s ease-out}
+.monster.dead{animation:die .9s ease-in forwards}
+.monster.gloat{animation:gloat .8s ease-in-out 2}
+.slash{position:absolute;width:min(60vw,320px);height:10px;border-radius:5px;background:linear-gradient(90deg,transparent,#fff,var(--gold),transparent);opacity:0;transform:rotate(-30deg) scaleX(.2)}
+.slash.go{animation:slash .3s ease-out}
+.pop{position:absolute;font:40px var(--display);animation:float 1s ease-out forwards}
+.pop.me{color:var(--life);text-shadow:0 3px 0 #0b4d2a}
+.pop.foe{color:var(--blood);text-shadow:0 3px 0 #4d0b10;font-size:26px}
+.flash{position:absolute;inset:0;opacity:0;z-index:1;pointer-events:none;background:var(--life)}
+.flash.go{animation:flash .25s ease-out}
+
+.status{position:absolute;left:0;right:0;bottom:calc(150px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;z-index:3;pointer-events:none;padding:0 16px}
+.status div{background:rgba(18,13,23,.85);border-radius:999px;padding:8px 14px;font-size:14px;text-align:center;max-width:440px}
+.status div.warn{color:var(--gold)}
+.controls{position:absolute;left:0;right:0;bottom:0;z-index:3;padding-bottom:max(12px,env(safe-area-inset-bottom,0px));
+  padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+.controls .inner{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.gauge{display:flex;align-items:center;gap:10px;background:rgba(18,13,23,.85);border-radius:12px;padding:8px 12px;font-size:13px}
+.gauge .track{flex:1;position:relative;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--life) 0 var(--dz,40%),#4a3b52 var(--dz,40%) var(--uz,80%),var(--ember) var(--uz,80%))}
+.gauge .needle{position:absolute;top:-4px;width:4px;height:18px;border-radius:2px;background:#fff;left:50%;transition:left .08s linear;box-shadow:0 0 6px #000}
+.gauge .lbl{min-width:84px;font:14px var(--display);text-align:right;font-variant-numeric:tabular-nums}
+.ctlrow{display:flex;gap:10px}
+.ctlrow .btn{font-size:16px;padding:14px}
+.ctlrow .manual{flex:2;background:var(--stone-3);border:2px solid var(--ember)}
+.ctlrow .quit{flex:1}
+
+.count{position:absolute;inset:0;display:grid;place-items:center;z-index:5;font:min(40vw,200px) var(--display);color:#fff;text-shadow:0 6px 0 var(--ember);pointer-events:none}
+.count.small{font-size:min(14vw,72px)}
+.count span{animation:pop .8s ease-out}
+
+/* ---------- итоги ---------- */
+#result{background:radial-gradient(100% 60% at 50% 20%,#3d2a0e,var(--stone) 65%);justify-content:center}
+#result.lose{background:radial-gradient(100% 60% at 50% 20%,#3b1418,var(--stone) 65%)}
+#result .wrap{text-align:center;align-items:center}
+#rEmoji{font-size:100px;line-height:1}
+#rTitle{font-size:clamp(28px,8vw,40px)}
+.score{font:48px var(--display);font-variant-numeric:tabular-nums}
+.score .a{color:var(--life)} .score .b{color:var(--blood)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
+.stats div{background:var(--stone-2);border-radius:10px;padding:10px 6px}
+.stats b{display:block;font:22px var(--display);font-variant-numeric:tabular-nums;color:var(--gold)}
+.stats span{font-size:12px;color:var(--dim)}
+.badge{background:var(--gold);color:#2a1800;border-radius:999px;padding:4px 12px;font:14px var(--display)}
+
+@keyframes breathe{50%{transform:translateY(-6px) scale(1.03)}}
+@keyframes push{0%,100%{transform:none}50%{transform:scaleY(.72) scaleX(1.1)}}
+@keyframes hit{0%{transform:none}20%{transform:translateX(-18px) scale(.92) rotate(-6deg);filter:brightness(2.4) saturate(0)}50%{transform:translateX(14px) rotate(4deg)}100%{transform:none}}
+@keyframes die{30%{transform:scale(1.2) rotate(-10deg);filter:brightness(3)}100%{transform:scale(0) rotate(200deg);opacity:0}}
+@keyframes gloat{50%{transform:translateY(-20px) scale(1.15)}}
+@keyframes slash{0%{opacity:1;transform:rotate(-30deg) scaleX(.2)}100%{opacity:0;transform:rotate(-30deg) scaleX(1.2)}}
+@keyframes float{0%{transform:translate(0,0) scale(.6);opacity:1}25%{transform:translate(var(--dx,10px),-30px) scale(1.2)}100%{transform:translate(calc(var(--dx,10px)*3),-110px) scale(1);opacity:0}}
+@keyframes flash{0%{opacity:.3}100%{opacity:0}}
+@keyframes pop{0%{transform:scale(2);opacity:0}30%{transform:scale(1);opacity:1}100%{opacity:.9}}
+@keyframes pulse{to{opacity:.55}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<!-- ============ МЕНЮ ============ -->
+<section id="menu" class="screen">
+  <div class="wrap">
+    <div class="logo">
+      <span class="label">Арена отжиманий · 1 минута</span>
+      <h1>Отжимания против монстров</h1>
+      <p>Монстр тоже отжимается. За минуту сделайте больше него — камера сама считает ваши отжимания.</p>
+    </div>
+
+    <div class="prog">
+      <span class="label">Ваш прогресс</span>
+      <div class="nums">
+        <div><b id="pBest">0</b><span>рекорд за минуту</span></div>
+        <div><b id="pTotal">0</b><span>всего отжиманий</span></div>
+        <div><b id="pWins">0/6</b><span>монстров побеждено</span></div>
+      </div>
+      <div class="chart" id="chart"></div>
+      <p class="chart-empty" id="chartEmpty">Здесь появятся ваши последние бои.</p>
+      <div class="legend"><span style="--c:var(--life)">победа</span><span style="--c:#5a4566">поражение</span><span style="--c:var(--gold)">рекорд</span></div>
+    </div>
+
+    <div class="foes" id="foes" role="radiogroup" aria-label="Соперник"></div>
+
+    <div class="opts">
+      <label for="diff">Сложность
+        <select id="diff">
+          <option value="0.75">Лёгкая</option>
+          <option value="1" selected>Нормальная</option>
+          <option value="1.3">Тяжёлая</option>
+          <option value="1.6">Безумная</option>
+        </select>
+      </label>
+      <label for="sens">Строгость подсчёта
+        <select id="sens">
+          <option value="easy">Мягко</option>
+          <option value="normal" selected>Обычно</option>
+          <option value="strict">Строго</option>
+        </select>
+      </label>
+      <label class="chk" for="sound"><input type="checkbox" id="sound" checked> Звук и вибрация</label>
+    </div>
+
+    <div id="menuErr" class="err" hidden></div>
+    <button class="btn primary" id="startCam">В бой с камерой</button>
+    <button class="btn ghost" id="startManual">Без камеры (считать кнопкой)</button>
+
+    <div class="howto">
+      <h3>Как поставить телефон</h3>
+      <svg viewBox="0 0 320 120" role="img" aria-label="Телефон стоит на полу боком к человеку в упоре лёжа, весь корпус в кадре">
+        <line x1="0" y1="108" x2="320" y2="108" stroke="#4a3b52" stroke-width="2"/>
+        <rect x="14" y="58" width="22" height="48" rx="4" fill="#2c2234" stroke="#ffc83d" stroke-width="2"/>
+        <circle cx="25" cy="64" r="2.5" fill="#ffc83d"/>
+        <path d="M36 64 L300 22 L300 106 L36 76 Z" fill="#ffc83d" fill-opacity=".08" stroke="#ffc83d" stroke-opacity=".5" stroke-dasharray="4 4"/>
+        <circle cx="270" cy="66" r="9" fill="#f3eadb"/>
+        <line x1="258" y1="72" x2="150" y2="96" stroke="#f3eadb" stroke-width="8" stroke-linecap="round"/>
+        <line x1="150" y1="96" x2="104" y2="106" stroke="#f3eadb" stroke-width="7" stroke-linecap="round"/>
+        <line x1="250" y1="76" x2="252" y2="106" stroke="#ff7a1a" stroke-width="6" stroke-linecap="round"/>
+        <text x="60" y="28" fill="#a99db0" font-size="12" font-family="Rubik,sans-serif">1,5–2 м</text>
+      </svg>
+      <ol>
+        <li>Поставьте телефон <b>на пол боком к себе</b>, экраном к вам, прислонив к стене или бутылке.</li>
+        <li>Отойдите на 1,5–2 метра: в кадре должны быть <b>голова, руки и ноги целиком</b>.</li>
+        <li>Включите хороший свет. Можно и лицом к телефону, как в видео, но сбоку считается точнее.</li>
+        <li>Опускайтесь, пока руки сильно не согнутся, и выпрямляйте их до конца — тогда отжимание засчитается.</li>
+      </ol>
+    </div>
+    <p class="note">Видео с камеры никуда не отправляется — всё считается прямо в телефоне. Прогресс хранится в этом браузере.</p>
+    <button class="btn ghost" id="resetProgress">Сбросить прогресс</button>
+  </div>
+</section>
+
+<!-- ============ БОЙ ============ -->
+<section id="battle" class="screen" hidden>
+  <video id="cam" playsinline muted autoplay></video>
+  <canvas id="skel"></canvas>
+  <div class="flash" id="flash"></div>
+
+  <div class="hud">
+    <div class="board">
+      <div class="row">
+        <div class="side me"><span class="em">💪</span><div><small>Вы</small><b id="myReps">0</b></div></div>
+        <div class="timer" id="timer">1:00</div>
+        <div class="side r foe-s"><span class="em" id="hEm">🦠</span><div><small id="hName">Слизень</small><b id="foeReps">0</b></div></div>
+      </div>
+      <div class="tug"><i id="tug"></i></div>
+    </div>
+  </div>
+
+  <div class="arena">
+    <div class="monster idle" id="monster">🦠</div>
+    <div class="slash" id="slash"></div>
+    <div id="popLayer" style="position:absolute;inset:0;display:grid;place-items:center"></div>
+  </div>
+
+  <div class="status"><div id="status">Загружаю распознавание позы…</div></div>
+
+  <div class="controls">
+    <div class="inner">
+      <div class="gauge" id="gauge">
+        <span>Локти</span>
+        <div class="track" id="track"><div class="needle" id="needle"></div></div>
+        <span class="lbl" id="angleLbl">—</span>
+      </div>
+      <div class="ctlrow">
+        <button class="btn manual" id="manualHit">+1 вручную</button>
+        <button class="btn ghost quit" id="quit">Выйти</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="count" id="count" hidden></div>
+</section>
+
+<!-- ============ ИТОГИ ============ -->
+<section id="result" class="screen" hidden>
+  <div class="wrap">
+    <div id="rEmoji">🏆</div>
+    <h2 id="rTitle">Победа!</h2>
+    <div class="score"><span class="a" id="rMe">0</span> : <span class="b" id="rFoe">0</span></div>
+    <span class="badge" id="rRecord" hidden>Новый рекорд!</span>
+    <p class="note" id="rText" style="font-size:15px"></p>
+    <div class="stats">
+      <div><b id="rBest">0</b><span>ваш рекорд</span></div>
+      <div><b id="rTotal">0</b><span>всего отжиманий</span></div>
+      <div><b id="rDelta">—</b><span>к прошлому бою</span></div>
+    </div>
+    <button class="btn primary" id="rNext">Следующий монстр</button>
+    <button class="btn ghost" id="rAgain">Ещё раз</button>
+    <button class="btn ghost" id="rMenu">В меню</button>
+  </div>
+</section>
+
+<script>
+/* ===================== Подсчёт отжиманий (чистая логика) ===================== */
+// Пороги подобраны по реальным кадрам отжиманий (камера спереди): угол в локтях наверху ~150–165°, внизу ~90–105°.
+const SENS = {
+  easy:   {down:120, up:135},
+  normal: {down:115, up:140},
+  strict: {down:100, up:150},
+};
+
+function jointAngle(a,b,c){
+  const ux=a.x-b.x, uy=a.y-b.y, uz=(a.z||0)-(b.z||0);
+  const vx=c.x-b.x, vy=c.y-b.y, vz=(c.z||0)-(b.z||0);
+  const d=Math.hypot(ux,uy,uz)*Math.hypot(vx,vy,vz);
+  if(!d) return null;
+  return Math.acos(Math.max(-1,Math.min(1,(ux*vx+uy*vy+uz*vz)/d)))*180/Math.PI;
+}
+
+// lm — точки на кадре (0..1, y вниз, есть visibility), wlm — 3D-точки в метрах (если есть).
+// Возвращает средний угол в локтях по видимым рукам, взвешенный по уверенности.
+function elbowAngleFromPose(lm, wlm, minVis=0.5){
+  if(!lm) return {angle:null, reason:'nobody'};
+  const arms=[[11,13,15],[12,14,16]];
+  let sum=0, w=0, handsUp=false;
+  for(const [s,e,h] of arms){
+    const S=lm[s], E=lm[e], H=lm[h];
+    if(!S||!E||!H) continue;
+    const vis=Math.min(S.visibility??1, E.visibility??1, H.visibility??1);
+    if(vis<minVis) continue;
+    // В упоре лёжа кисть всегда ниже локтя. Если кисть выше — это не отжимание (например, сгибают руки стоя).
+    if(H.y < E.y-0.03){ handsUp=true; continue; }
+    const P = wlm && wlm[s] ? wlm : lm;
+    const a=jointAngle(P[s],P[e],P[h]);
+    if(a==null) continue;
+    sum+=a*vis; w+=vis;
+  }
+  if(!w) return {angle:null, reason: handsUp ? 'handsUp' : 'noArms'};
+  return {angle:sum/w, reason:'ok'};
+}
+
+class PushupCounter{
+  constructor(o={}){
+    this.down=o.down??100; this.up=o.up??150;
+    this.tauMs=o.tauMs??40;          // сглаживание по времени (не зависит от частоты кадров)
+    this.minDownMs=o.minDownMs??80;  // сколько нужно пробыть внизу — отсекает одиночные «скачки» распознавания
+    this.minRepMs=o.minRepMs??350;   // не чаще одного раза в 0,35 с
+    this.maxLost=o.maxLost??45;      // сколько кадров подряд можно «потерять» человека
+    this.reset();
+  }
+  reset(){ this.state='unknown'; this.smooth=null; this.count=0; this.downSince=0; this.lastRep=-1e9; this.lost=0; this.lastT=null; }
+  // angle — угол в градусах или null, t — время в мс. Возвращает true, если засчитано отжимание.
+  update(angle,t){
+    if(angle==null || !isFinite(angle)){
+      if(++this.lost>this.maxLost){ this.state='unknown'; this.smooth=null; }
+      return false;
+    }
+    this.lost=0;
+    const dt = this.lastT==null ? 33 : Math.max(1, t-this.lastT); this.lastT=t;
+    const alpha = 1-Math.exp(-dt/this.tauMs);
+    this.smooth = this.smooth==null ? angle : this.smooth + alpha*(angle-this.smooth);
+    const a=this.smooth;
+    if(this.state==='unknown'){ if(a>this.up) this.state='up'; return false; }
+    if(this.state==='up'){ if(a<this.down){ this.state='down'; this.downSince=t; } return false; }
+    if(a>this.up){
+      this.state='up';
+      if(t-this.downSince>=this.minDownMs && t-this.lastRep>=this.minRepMs){
+        this.count++; this.lastRep=t; return true;
+      }
+    }
+    return false;
+  }
+}
+
+// Расписание отжиманий монстра: секунды от старта. Темп = отжиманий в минуту, к концу монстр устаёт.
+function monsterSchedule(pace, secs=60, rnd=Math.random){
+  const out=[]; let t=1.2;
+  const base=60/pace/1.12;
+  while(true){
+    const tired=1+0.25*(t/secs);
+    t+=base*tired*(0.8+0.4*rnd());
+    if(t>=secs) break;
+    out.push(+t.toFixed(2));
+  }
+  return out;
+}
+window.__pushup = {jointAngle, elbowAngleFromPose, PushupCounter, SENS, monsterSchedule};
+
+/* ===================== Соперники и прогресс ===================== */
+const ROUND_SECS = 60;
+const FOES = [
+  {id:'slime',  em:'🦠', name:'Слизень Бульк',   pace:12, line:'Растёкся лужей.'},
+  {id:'goblin', em:'👺', name:'Гоблин Хряп',     pace:18, line:'Удрал обратно в нору.'},
+  {id:'troll',  em:'🗿', name:'Каменный тролль', pace:24, line:'Рассыпался в щебень.'},
+  {id:'skel',   em:'💀', name:'Скелет-рыцарь',   pace:30, line:'Кости собирать уже некому.'},
+  {id:'dragon', em:'🐉', name:'Дракон Пепел',    pace:38, line:'Самый сильный монстр арены пал.'},
+  {id:'ghost',  em:'👤', name:'Тень (ваш рекорд)', pace:0, line:'Вы обогнали самого себя!'},
+];
+const store = {
+  get(k,d){ try{ const v=localStorage.getItem('pm_'+k); return v==null?d:JSON.parse(v);}catch(e){return d;} },
+  set(k,v){ try{ localStorage.setItem('pm_'+k, JSON.stringify(v)); }catch(e){} },
+};
+// history: [{d:дата, foe, reps, foeReps, win, diff}], best: {reps, times:[сек]}, beaten: {foeId:true}
+let history = store.get('history', []);
+let best = store.get('best', {reps:0, times:[]});
+let beaten = store.get('beaten', {});
+let totalReps = store.get('total', 0);
+let selFoe = store.get('selFoe', 'slime');
+
+const $ = id => document.getElementById(id);
+function show(id){ for(const s of ['menu','battle','result']) $(s).hidden = s!==id; }
+function fmt(sec){ sec=Math.max(0,Math.ceil(sec)); return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0'); }
+const diffK = () => parseFloat($('diff').value)||1;
+const diffName = () => $('diff').selectedOptions[0].textContent;
+function unlocked(i){ const f=FOES[i]; if(f.id==='ghost') return best.reps>0; return i===0 || beaten[FOES[i-1].id]; }
+function foePace(f){ return f.id==='ghost' ? best.reps : Math.round(f.pace*diffK()); }
+
+function renderMenu(){
+  if(!unlocked(FOES.findIndex(f=>f.id===selFoe))) selFoe='slime';
+  $('foes').innerHTML = FOES.map((f,i)=>{
+    const open=unlocked(i), sel=f.id===selFoe, won=beaten[f.id];
+    const sub = !open ? (f.id==='ghost'?'Откроется после первого боя':'Сначала победите предыдущего') :
+                f.id==='ghost' ? 'Соперник повторяет ваш лучший бой' : (won?'Побеждён · можно ещё':'Отжимается в своём темпе');
+    const pace = f.id==='ghost' ? (best.reps? best.reps+' за мин':'—') : '~'+foePace(f)+' за мин';
+    return `<button class="foe ${sel?'sel':''} ${open?'':'locked'} ${won?'beaten':''}" role="radio" aria-checked="${sel}" ${open?'':'disabled'} data-id="${f.id}">
+      <span class="em">${open?f.em:'🔒'}</span><div><b>${f.name}</b><span>${sub}</span></div><span class="pace">${won?'✓ ':''}${pace}</span></button>`;
+  }).join('');
+  $('foes').querySelectorAll('.foe').forEach(b=>b.onclick=()=>{ selFoe=b.dataset.id; store.set('selFoe',selFoe); renderMenu(); });
+  $('pBest').textContent=best.reps; $('pTotal').textContent=totalReps;
+  $('pWins').textContent=FOES.filter(f=>beaten[f.id]).length+'/'+FOES.length;
+  const last=history.slice(-14), max=Math.max(10,...last.map(h=>h.reps));
+  $('chart').innerHTML=last.map(h=>`<i class="${h.reps===best.reps&&h.reps>0?'best':h.win?'win':''}" style="height:${Math.max(4,h.reps/max*100)}%" title="${h.reps}"></i>`).join('');
+  $('chart').hidden=!last.length; $('chartEmpty').hidden=!!last.length;
+}
+['diff','sens','sound'].forEach(id=>{
+  const el=$(id), v=store.get('opt_'+id,null);
+  if(v!=null){ if(el.type==='checkbox') el.checked=v; else el.value=v; }
+  el.addEventListener('change',()=>{ store.set('opt_'+id, el.type==='checkbox'?el.checked:el.value); renderMenu(); });
+});
+
+/* ===================== Звук и вибрация ===================== */
+let actx=null;
+function beep(kind){
+  if(!$('sound').checked) return;
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    const t=actx.currentTime, o=actx.createOscillator(), g=actx.createGain();
+    o.connect(g); g.connect(actx.destination);
+    if(kind==='hit'){ o.type='square'; o.frequency.setValueAtTime(220,t); o.frequency.exponentialRampToValueAtTime(60,t+.15); g.gain.setValueAtTime(.25,t); g.gain.exponentialRampToValueAtTime(.001,t+.18); o.start(t); o.stop(t+.2); }
+    else if(kind==='foe'){ o.type='sine'; o.frequency.setValueAtTime(140,t); g.gain.setValueAtTime(.12,t); g.gain.exponentialRampToValueAtTime(.001,t+.12); o.start(t); o.stop(t+.14); }
+    else if(kind==='tick'){ o.type='sine'; o.frequency.value=660; g.gain.setValueAtTime(.2,t); g.gain.exponentialRampToValueAtTime(.001,t+.12); o.start(t); o.stop(t+.14); }
+    else if(kind==='win'){ o.type='triangle'; [523,659,784,1046].forEach((f,i)=>o.frequency.setValueAtTime(f,t+i*.12)); g.gain.setValueAtTime(.25,t); g.gain.exponentialRampToValueAtTime(.001,t+.7); o.start(t); o.stop(t+.72); }
+    else { o.type='sawtooth'; o.frequency.setValueAtTime(300,t); o.frequency.exponentialRampToValueAtTime(80,t+.6); g.gain.setValueAtTime(.2,t); g.gain.exponentialRampToValueAtTime(.001,t+.6); o.start(t); o.stop(t+.62); }
+  }catch(e){}
+}
+function buzz(ms){ if(!$('sound').checked) return; try{ navigator.vibrate && navigator.vibrate(ms); }catch(e){} }
+
+/* ===================== Камера и распознавание ===================== */
+const MP_VER='0.10.14';
+let landmarker=null, stream=null, wakeLock=null;
+async function loadLandmarker(){
+  if(landmarker) return landmarker;
+  const {PoseLandmarker, FilesetResolver} = await import(`https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}/vision_bundle.mjs`);
+  const files = await FilesetResolver.forVisionTasks(`https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}/wasm`);
+  const opts = d => ({
+    baseOptions:{ modelAssetPath:'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task', delegate:d },
+    runningMode:'VIDEO', numPoses:1,
+    minPoseDetectionConfidence:.5, minPosePresenceConfidence:.5, minTrackingConfidence:.5,
+  });
+  try{ landmarker = await PoseLandmarker.createFromOptions(files, opts('GPU')); }
+  catch(e){ landmarker = await PoseLandmarker.createFromOptions(files, opts('CPU')); }
+  return landmarker;
+}
+async function startCamera(){
+  if(!window.isSecureContext) throw new Error('Камера работает только по ссылке https://. Откройте игру по защищённой ссылке.');
+  if(!navigator.mediaDevices?.getUserMedia) throw new Error('Этот браузер не даёт доступ к камере. Попробуйте Chrome или Safari.');
+  stream = await navigator.mediaDevices.getUserMedia({audio:false, video:{facingMode:'user', width:{ideal:640}, height:{ideal:480}}});
+  const v=$('cam'); v.srcObject=stream; await v.play();
+}
+function stopCamera(){ if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; } $('cam').srcObject=null; }
+async function keepAwake(){ try{ wakeLock = await navigator.wakeLock?.request('screen'); }catch(e){} }
+
+const BONES=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];
+function drawSkeleton(lm,state){
+  const c=$('skel'), v=$('cam'), g=c.getContext('2d');
+  if(c.width!==v.videoWidth||c.height!==v.videoHeight){ c.width=v.videoWidth||640; c.height=v.videoHeight||480; }
+  g.clearRect(0,0,c.width,c.height);
+  if(!lm) return;
+  g.lineWidth=Math.max(3,c.width/120); g.strokeStyle= state==='down' ? '#3ddc84' : '#ff7a1a'; g.lineCap='round';
+  for(const [a,b] of BONES){ const A=lm[a],B=lm[b]; if(!A||!B||(A.visibility??1)<.4||(B.visibility??1)<.4) continue;
+    g.beginPath(); g.moveTo(A.x*c.width,A.y*c.height); g.lineTo(B.x*c.width,B.y*c.height); g.stroke(); }
+  g.fillStyle='#fff';
+  for(const i of [0,11,12,13,14,15,16,23,24]){ const P=lm[i]; if(!P||(P.visibility??1)<.4) continue;
+    g.beginPath(); g.arc(P.x*c.width,P.y*c.height,Math.max(4,c.width/90),0,7); g.fill(); }
+}
+
+/* ===================== Матч ===================== */
+const game = { foe:null, my:0, foeN:0, myTimes:[], sched:[], startT:0, running:false, over:false, mode:'cam', raf:0, lastVideoT:-1, counter:null, statusT:0 };
+
+function setStatus(text,warn){ const s=$('status'); s.textContent=text; s.className=warn?'warn':''; }
+function setGauge(angle){
+  const c=game.counter, lo=40, hi=180, pct=a=>((a-lo)/(hi-lo)*100).toFixed(1)+'%';
+  $('track').style.setProperty('--dz',pct(c.down)); $('track').style.setProperty('--uz',pct(c.up));
+  if(angle==null){ $('angleLbl').textContent='—'; return; }
+  $('needle').style.left=`calc(${pct(Math.max(lo,Math.min(hi,angle)))} - 2px)`;
+  $('angleLbl').textContent = Math.round(angle)+'° '+(c.state==='down'?'вверх!':'вниз');
+}
+function renderScore(){
+  $('myReps').textContent=game.my; $('foeReps').textContent=game.foeN;
+  const sum=game.my+game.foeN; $('tug').style.width=(sum? game.my/sum*100 : 50)+'%';
+}
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+async function countdown(){
+  const el=$('count'); el.hidden=false; el.classList.remove('small');
+  for(const n of ['3','2','1']){ if(!game.foe) return; el.innerHTML=`<span>${n}</span>`; beep('tick'); await sleep(800); }
+  el.classList.add('small'); el.innerHTML='<span>В БОЙ!</span>'; await sleep(600); el.hidden=true;
+}
+
+async function startBattle(mode){
+  $('menuErr').hidden=true;
+  game.mode=mode;
+  game.counter=new PushupCounter(SENS[$('sens').value]||SENS.normal);
+  show('battle'); $('battle').classList.toggle('nocam', mode!=='cam'); $('gauge').hidden = mode!=='cam';
+  keepAwake();
+  if(mode==='cam'){
+    setStatus('Включаю камеру…');
+    try{
+      await startCamera();
+      setStatus('Загружаю распознавание позы (первый раз до 10 секунд)…');
+      await loadLandmarker();
+    }catch(e){
+      stopAll(); show('menu');
+      const msg = e && e.name==='NotAllowedError' ? 'Доступ к камере запрещён. Разрешите камеру для этого сайта в настройках браузера и попробуйте снова.'
+                : e && e.name==='NotFoundError' ? 'Камера не найдена.'
+                : (e && e.message && /https/.test(e.message)) ? e.message
+                : 'Не получилось запустить камеру или распознавание: '+(e&&e.message||e)+'. Проверьте интернет или играйте кнопкой.';
+      $('menuErr').textContent=msg; $('menuErr').hidden=false; return;
+    }
+  }
+  beginRound();
+}
+
+async function beginRound(){
+  const f=FOES.find(x=>x.id===selFoe)||FOES[0];
+  game.foe=f; game.my=0; game.foeN=0; game.myTimes=[]; game.running=false; game.over=false; game.counter.reset();
+  game.sched = f.id==='ghost' ? best.times.slice() : monsterSchedule(foePace(f), ROUND_SECS);
+  $('hEm').textContent=f.em; $('monster').textContent=f.em; $('hName').textContent=f.name;
+  $('monster').className='monster idle';
+  $('timer').textContent=fmt(ROUND_SECS); $('timer').classList.remove('low');
+  renderScore();
+  setStatus(game.mode==='cam' ? 'Встаньте в упор лёжа на прямые руки' : 'Отжимайтесь и нажимайте «+1 вручную» после каждого раза');
+  if(!game.raf) loop();
+  await countdown();
+  if(!game.foe) return;
+  game.startT=performance.now(); game.running=true;
+}
+
+function loop(){
+  game.raf=requestAnimationFrame(loop);
+  const now=performance.now();
+  if(game.running){
+    const el=(now-game.startT)/1000, left=ROUND_SECS-el;
+    $('timer').textContent=fmt(left); $('timer').classList.toggle('low', left<=10);
+    while(game.sched.length && game.sched[0]<=el){ game.sched.shift(); foeRep(); }
+    if(left<=0){ endRound(); }
+  }
+  if(game.mode!=='cam' || !landmarker) return;
+  const v=$('cam');
+  if(v.readyState<2 || v.currentTime===game.lastVideoT) return;
+  game.lastVideoT=v.currentTime;
+  let res; try{ res=landmarker.detectForVideo(v, now); }catch(e){ return; }
+  const lm=res.landmarks?.[0], wlm=res.worldLandmarks?.[0];
+  const {angle,reason}=elbowAngleFromPose(lm,wlm);
+  const counted = game.counter.update(angle, now);
+  drawSkeleton(lm, game.counter.state);
+  setGauge(game.counter.smooth);
+  if(now-game.statusT>400){
+    game.statusT=now;
+    if(reason==='nobody') setStatus('Не вижу человека. Отойдите, чтобы весь корпус был в кадре',true);
+    else if(reason==='noArms') setStatus('Не вижу руки целиком. Повернитесь боком к телефону',true);
+    else if(reason==='handsUp') setStatus('Руки должны упираться в пол',true);
+    else if(game.counter.state==='unknown') setStatus('Выпрямите руки — начинаем');
+    else if(game.running) setStatus(game.counter.state==='down' ? 'Теперь выжмите вверх!' : 'Опускайтесь ниже');
+  }
+  if(counted) myRep();
+}
+
+function popText(cls,text){
+  const d=document.createElement('div'); d.className='pop '+cls; d.textContent=text;
+  d.style.setProperty('--dx', (cls==='me'?-1:1)*(10+Math.random()*20)+'px');
+  $('popLayer').appendChild(d); setTimeout(()=>d.remove(),1000);
+}
+function replay(el,cls){ el.classList.remove('idle','push','hit',cls); void el.offsetWidth; el.classList.add(cls); }
+
+function myRep(){
+  if(!game.running) return;
+  game.my++; game.myTimes.push(+((performance.now()-game.startT)/1000).toFixed(2));
+  totalReps++; store.set('total', totalReps);
+  renderScore();
+  replay($('monster'),'hit'); replay($('slash'),'go'); replay($('flash'),'go');
+  popText('me','+1'); beep('hit'); buzz(40);
+}
+function foeRep(){
+  game.foeN++; renderScore();
+  const m=$('monster'); if(!m.classList.contains('hit')) replay(m,'push');
+  popText('foe','+1'); beep('foe');
+}
+$('monster').addEventListener('animationend',e=>{ const m=$('monster'); if(game.running && /push|hit/.test(e.animationName)){ m.classList.remove('push','hit'); m.classList.add('idle'); } });
+
+async function endRound(){
+  if(game.over) return;
+  game.running=false; game.over=true;
+  const f=game.foe, win=game.my>game.foeN, draw=game.my===game.foeN;
+  const prev=history.length ? history[history.length-1].reps : null;
+  const isRecord = game.my>best.reps;
+  if(isRecord){ best={reps:game.my, times:game.myTimes.slice()}; store.set('best',best); }
+  if(win){ beaten[f.id]=true; store.set('beaten',beaten); }
+  history.push({d:Date.now(), foe:f.id, reps:game.my, foeReps:game.foeN, win, diff:diffK()});
+  history=history.slice(-100); store.set('history',history);
+
+  $('monster').className = win ? 'monster dead' : 'monster gloat';
+  beep(win?'win':'lose'); buzz(win?[60,40,120]:300);
+  await sleep(1100);
+
+  const idx=FOES.indexOf(f), next=FOES[idx+1];
+  $('result').classList.toggle('lose',!win);
+  $('rEmoji').textContent = win ? (f.id==='ghost'?'⚡':'🏆') : draw ? '🤝' : f.em;
+  $('rTitle').textContent = win ? `${f.name.replace(/ \(.*\)/,'')} повержен!` : draw ? 'Ничья!' : `${f.name.replace(/ \(.*\)/,'')} оказался быстрее`;
+  if(f.id==='ghost') $('rTitle').textContent = win ? 'Вы побили свой рекорд!' : draw ? 'Ровно как в лучший раз!' : 'Тень оказалась быстрее';
+  $('rMe').textContent=game.my; $('rFoe').textContent=game.foeN;
+  $('rRecord').hidden=!isRecord;
+  $('rText').textContent = win ? f.line + (next && f.id!=='ghost' && next.id!=='ghost' ? ` Открыт следующий соперник: ${next.name}.` : '')
+                          : draw ? 'Нужно хотя бы на одно отжимание больше, чтобы победить.'
+                          : `Не хватило ${game.foeN-game.my+1}. Отдохните и попробуйте ещё — или поставьте сложность полегче.`;
+  $('rBest').textContent=best.reps; $('rTotal').textContent=totalReps;
+  $('rDelta').textContent = prev==null ? '—' : (game.my-prev>0?'+':'')+(game.my-prev);
+  const nextOpen = win && next && unlocked(idx+1) && next.id!=='ghost';
+  $('rNext').hidden=!nextOpen; if(nextOpen) $('rNext').textContent=`Дальше: ${next.name}`;
+  show('result');
+}
+
+function stopAll(){ game.running=false; game.foe=null; cancelAnimationFrame(game.raf); game.raf=0; stopCamera();
+  $('count').hidden=true; try{wakeLock&&wakeLock.release();}catch(e){} wakeLock=null; }
+function backToMenu(){ stopAll(); renderMenu(); show('menu'); }
+
+$('startCam').onclick=()=>startBattle('cam');
+$('startManual').onclick=()=>startBattle('manual');
+$('resetProgress').onclick=()=>{
+  const b=$('resetProgress');
+  if(b.dataset.armed){ history=[];best={reps:0,times:[]};beaten={};totalReps=0;selFoe='slime';
+    ['history','best','beaten','total','selFoe'].forEach(k=>store.set(k,k==='history'?[]:k==='best'?best:k==='beaten'?{}:k==='total'?0:'slime'));
+    delete b.dataset.armed; b.textContent='Сбросить прогресс'; renderMenu(); return; }
+  b.dataset.armed=1; b.textContent='Точно сбросить? Нажмите ещё раз'; setTimeout(()=>{delete b.dataset.armed;b.textContent='Сбросить прогресс';},4000);
+};
+$('manualHit').onclick=()=>myRep();
+$('quit').onclick=backToMenu;
+$('rMenu').onclick=backToMenu;
+$('rAgain').onclick=()=>{ show('battle'); beginRound(); };
+$('rNext').onclick=()=>{ const i=FOES.findIndex(f=>f.id===selFoe); selFoe=FOES[i+1].id; store.set('selFoe',selFoe); show('battle'); beginRound(); };
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && game.running) keepAwake(); });
+renderMenu();
+</script>
+</body>
+</html>
