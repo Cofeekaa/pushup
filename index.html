@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>Арена отжиманий</title>
 <meta name="theme-color" content="#0d0b14">
+<meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="apple-mobile-web-app-title" content="Арена">
 <link rel="apple-touch-icon" id="touchIcon" href="">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,7 +43,16 @@ h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance;l
 .hex>i{display:grid;place-items:center;width:100%;height:100%;clip-path:var(--hex);font-style:normal;
   background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--c1) 65%,#fff 10%),var(--c2) 75%);
   font-size:calc(var(--s)*.5);line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.45)}
-.hex.lock>i{background:var(--panel-2);filter:grayscale(1)}
+.hex>i svg{width:100%;height:100%;display:block}
+.hex.lock>i{background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--c1) 35%,#1a1422),#0d0a12 75%)}
+.hex.lock svg,.hex.lock img{filter:brightness(0);opacity:.92}
+.hex>i img{width:100%;height:100%;object-fit:cover;display:block}
+.pics{display:flex;flex-direction:column;gap:8px}
+.pic{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:10px;background:var(--panel-2);border-radius:12px;padding:8px 10px}
+.pic .hex{--s:40px;padding:2px}
+.pic b{font:14px var(--display);min-width:0}
+.pic button{font-size:13px;padding:8px 10px;border-radius:9px;border:1px solid var(--line)}
+.pic button.set{background:var(--chakra);color:#1d0c00;border-color:transparent;font-weight:500}
 
 /* ---------- меню ---------- */
 #menu{background:
@@ -83,13 +93,24 @@ h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance;l
 .card .pace{font:13px var(--display);color:var(--c1);font-variant-numeric:tabular-nums}
 .card .tier{position:absolute;top:8px;left:10px;font:11px var(--display);color:var(--muted)}
 .card .done{position:absolute;top:8px;right:10px;color:var(--me);font-size:14px}
-.card.sel{border-color:var(--c1);box-shadow:0 0 0 1px var(--c1),0 8px 30px -8px var(--c1)}
-.card.lock{opacity:.5}
-.card.lock .pace{color:var(--muted)}
+.card.sel{border-color:var(--c1);animation:selGlow 1.8s ease-in-out infinite}
+.card.lock b{color:var(--muted)}
+.card.lock small,.card.lock .pace{color:#6f6680}
+.card .lk{position:absolute;top:58px;left:calc(50% + 16px);width:24px;height:24px;border-radius:50%;background:var(--ink);border:2px solid var(--line);display:grid;place-items:center;font-size:11px}
+.power{display:flex;gap:3px;justify-content:center}
+.power i{width:12px;height:5px;border-radius:2px;background:var(--line)}
+.power i.on{background:var(--c1);box-shadow:0 0 6px -1px var(--c1)}
+.card.lock .power i.on{background:#5b5068;box-shadow:none}
 .card.boss{grid-column:1/-1;flex-direction:row;text-align:left;padding:14px 16px;gap:14px}
-.card.boss .hex{--s:76px}
-.card.boss .txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.card.boss .hex{--s:84px}
+.card.boss .txt{display:flex;flex-direction:column;gap:3px;min-width:0}
 .card.boss .tier{position:static;color:var(--gold)}
+.card.boss .power{justify-content:flex-start}
+.card.boss .lk{top:auto;bottom:12px;left:76px}
+.card.final{background:linear-gradient(115deg,#3a0d12,var(--panel) 45%,#2a1030);background-size:220% 220%;animation:bossBg 5s ease-in-out infinite}
+.card.final.sel{animation:bossBg 5s ease-in-out infinite,selGlow 1.8s ease-in-out infinite}
+.card.final::after{content:"";position:absolute;inset:0;border-radius:14px;pointer-events:none;
+  background:repeating-linear-gradient(115deg,transparent 0 22px,rgba(255,255,255,.03) 22px 24px)}
 
 .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .opts label{display:flex;flex-direction:column;gap:6px;color:var(--muted);font-size:12px}
@@ -215,6 +236,8 @@ details.howto .in{display:flex;flex-direction:column;gap:10px;padding-bottom:14p
 .rXp{width:100%;display:flex;flex-direction:column;gap:6px;text-align:left}
 #result .btn{width:100%}
 
+@keyframes selGlow{0%,100%{box-shadow:0 0 0 1px var(--c1),0 6px 22px -10px var(--c1)}50%{box-shadow:0 0 0 1px var(--c1),0 8px 34px -6px var(--c1)}}
+@keyframes bossBg{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 @keyframes breathe{50%{transform:translateY(-6px) scale(1.03)}}
 @keyframes aura{50%{transform:scale(1.12);opacity:.75}}
 @keyframes push{0%,100%{transform:none}50%{transform:scaleY(.74) scaleX(1.08)}}
@@ -262,7 +285,7 @@ details.howto .in{display:flex;flex-direction:column;gap:10px;padding-bottom:14p
       <p class="chartNote" id="chartNote">Здесь появятся ваши последние бои: зелёный — победа, жёлтый — рекорд.</p>
     </div>
 
-    <div class="secHead"><h2>Соперник</h2><span>от слабого к сильному</span></div>
+    <div class="secHead"><h2>Соперник</h2><button class="linkbtn" id="openPics" style="padding:0;font-size:13px">🖼 Свои картинки</button></div>
     <div class="roster" id="roster" role="radiogroup" aria-label="Соперник"></div>
 
     <div class="opts">
@@ -307,6 +330,26 @@ details.howto .in{display:flex;flex-direction:column;gap:10px;padding-bottom:14p
           <li>Опускайтесь, пока руки сильно не согнутся, и выпрямляйте их до конца.</li>
         </ol>
         <p class="note">На iPhone открывайте игру в Safari. Ярлык на экране «Домой» добавляйте с выключенным «Открыть как веб-приложение», иначе камера может не работать.</p>
+      </div>
+    </details>
+
+    <details class="howto" id="picsBox">
+      <summary>Свои картинки героев</summary>
+      <div class="in">
+        <p class="note">Сохраните картинку героя в «Фото» (например, кадр из аниме) и выберите её здесь. Картинка хранится только в этом телефоне и никуда не загружается.</p>
+        <div class="pics" id="pics"></div>
+        <input type="file" id="picFile" accept="image/*" hidden>
+      </div>
+    </details>
+
+    <details class="howto" id="saveBox">
+      <summary>Резервная копия прогресса</summary>
+      <div class="in">
+        <p class="note">Прогресс (все отжимания, рекорд, побеждённые герои) хранится в этом браузере. Чтобы точно не потерять его — например, при очистке Safari или смене телефона, — скопируйте код и сохраните в Заметки. Потом его можно вставить и восстановить всё.</p>
+        <button class="btn ghost" id="backupCopy">Скопировать код прогресса</button>
+        <textarea id="backupText" rows="3" style="width:100%;background:var(--panel-2);color:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px;font:12px/1.4 monospace;resize:vertical" placeholder="Сюда появится код или вставьте свой код для восстановления"></textarea>
+        <button class="btn ghost" id="backupRestore">Восстановить из кода</button>
+        <p class="note" id="backupMsg" role="status"></p>
       </div>
     </details>
 
@@ -498,6 +541,72 @@ const HEROES = [
   {id:'asta',     em:'⚔️', name:'Аста',     c1:'#9aa3b5', c2:'#16161c', pace:42, sub:'Чемпион арены. Самый сильный в отжиманиях', win:'Вы победили самого сильного — Асту!', taunt:['Я не сдамся!!!','Предел — это не про меня!','Сильнее!'], boss:true},
   {id:'ghost',    em:'👤', name:'Тень',     c1:'#8a7bff', c2:'#231a5c', pace:0,  sub:'Повторяет ваш лучший бой',      win:'Вы обогнали самого себя!', taunt:['Это ты вчера','Помнишь рекорд?']},
 ];
+// Портреты героев — простые рисунки по мотивам: причёска, цвет и узнаваемая деталь. viewBox совпадает с пропорцией жетона.
+const SKIN='#f7d2b0', SKIN2='#e4ae88';
+let artSeq=0;
+// Свои картинки игрока: хранятся в localStorage как уменьшенные JPEG.
+const customImgs = {};
+function loadCustomImgs(){ for(const h of HEROES){ try{ const v=localStorage.getItem('pm_img_'+h.id); if(v) customImgs[h.id]=v; }catch(e){} } }
+function art(h){
+  if(customImgs[h.id]) return `<img src="${customImgs[h.id]}" alt="">`;
+  const id='a'+(++artSeq);
+  const body=(c,extra='')=>`<rect x="42" y="78" width="16" height="12" fill="${SKIN2}"/><path d="M8 112 Q10 91 34 86 L66 86 Q90 91 92 112Z" fill="${c}"/>${extra}`;
+  const face=`<ellipse cx="27" cy="64" rx="4" ry="6" fill="${SKIN2}"/><ellipse cx="73" cy="64" rx="4" ry="6" fill="${SKIN2}"/><ellipse cx="50" cy="62" rx="23" ry="25" fill="${SKIN}"/>`;
+  const eyes=(c='#1b1b1b',ry=4.6)=>`<ellipse cx="41" cy="63" rx="3.6" ry="${ry}" fill="${c}"/><ellipse cx="59" cy="63" rx="3.6" ry="${ry}" fill="${c}"/><circle cx="42.3" cy="61.4" r="1.3" fill="#fff"/><circle cx="60.3" cy="61.4" r="1.3" fill="#fff"/>`;
+  const brows=(angry)=>angry?`<path d="M34 54 L46 58 M66 54 L54 58" stroke="#2a1a10" stroke-width="2.6" stroke-linecap="round"/>`:`<path d="M35 56 Q40 54 46 56 M54 56 Q60 54 65 56" stroke="#2a1a10" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
+  const grin=`<path d="M41 72 Q50 82 59 72 Z" fill="#7a1f1f"/><path d="M42 72.6 L58 72.6" stroke="#fff" stroke-width="2.2"/>`;
+  const smile=`<path d="M44 74 Q50 78.5 56 74" stroke="#5a2a1a" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
+  const flat=`<path d="M45 75 L55 75" stroke="#5a2a1a" stroke-width="2" stroke-linecap="round"/>`;
+  const s=(inner)=>`<svg viewBox="0 0 100 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${inner}</svg>`;
+  switch(h.id){
+    case 'naruto': return s(body('#ff7a00','<path d="M34 86 L50 100 L66 86" fill="#1b1b22"/>')+face+
+      `<path d="M31 68 L39 69 M31 72 L39 72 M31 76 L39 75 M69 68 L61 69 M69 72 L61 72 M69 76 L61 75" stroke="#6b4a32" stroke-width="1.4" stroke-linecap="round"/>`+
+      eyes('#1f5fbf')+brows(false)+grin+
+      `<path d="M24 60 L18 40 L29 44 L25 24 L38 35 L42 14 L50 30 L58 12 L62 33 L74 22 L71 42 L82 38 L76 60 Q74 46 50 42 Q26 46 24 60Z" fill="#ffcc1a" stroke="#d9a400" stroke-width="1.2"/>`+
+      `<rect x="25" y="44" width="50" height="9" rx="2" fill="#1d3c8f"/><rect x="38" y="42.5" width="24" height="12" rx="2" fill="#d3dae3" stroke="#8d97a5"/><path d="M45 49 q5 -6 10 0 q-5 3 -7 -1" stroke="#5b6573" fill="none" stroke-width="1.5"/>`);
+    case 'luffy': return s(body('#d62828',`<path d="M40 86 L50 104 L60 86Z" fill="${SKIN}"/>`)+face+
+      `<path d="M35 71 L42 71 M37 69 L38 73 M40 69 L41 73" stroke="#8a2b2b" stroke-width="1.2"/>`+
+      eyes()+brows(false)+`<path d="M38 72 Q50 85 62 72 Z" fill="#7a1f1f"/><path d="M39 72.6 L61 72.6" stroke="#fff" stroke-width="2.4"/>`+
+      `<path d="M27 60 Q24 44 34 40 L66 40 Q76 44 73 60 L70 50 L66 57 L62 47 L56 55 L50 46 L44 55 L38 47 L34 57 L30 50Z" fill="#161616"/>`+
+      `<path d="M29 40 Q31 16 50 15 Q69 16 71 40 Z" fill="#f2c94c" stroke="#c79a2c" stroke-width="1.2"/><path d="M29.4 35 L70.6 35 L71 41 L29 41Z" fill="#d62828"/>`+
+      `<ellipse cx="50" cy="41" rx="41" ry="7.5" fill="#f6d365" stroke="#c79a2c" stroke-width="1.2"/>`);
+    case 'asta': return s(body('#1e1e24','<path d="M34 86 L50 98 L66 86" fill="none" stroke="#c9a227" stroke-width="2.5"/>')+face+
+      eyes('#2f9e55')+brows(true)+grin+
+      `<path d="M24 58 L16 34 L30 42 L25 16 L40 33 L44 8 L52 29 L60 6 L62 31 L75 15 L71 39 L85 32 L76 58 Q72 46 50 44 Q28 46 24 58Z" fill="#eceff3" stroke="#b6bcc6" stroke-width="1.2"/>`+
+      `<path d="M23 49 Q50 39 77 49 L77 57 Q50 47 23 57Z" fill="#1b1b20"/><path d="M76 51 L88 46 L86 55 Z" fill="#1b1b20"/>`);
+    case 'deku': return s(body('#2f8f6a','<path d="M36 86 L50 96 L64 86" fill="#1c4a3a"/>')+face+
+      `<g fill="#8a5a3c"><circle cx="35" cy="70" r="1"/><circle cx="38" cy="72" r="1"/><circle cx="41" cy="70" r="1"/><circle cx="65" cy="70" r="1"/><circle cx="62" cy="72" r="1"/><circle cx="59" cy="70" r="1"/></g>`+
+      eyes('#1f8f55',5.2)+brows(false)+smile+
+      `<g fill="#1f5f43"><circle cx="29" cy="50" r="9"/><circle cx="71" cy="50" r="9"/><circle cx="36" cy="40" r="11"/><circle cx="64" cy="40" r="11"/><circle cx="50" cy="35" r="12"/><circle cx="43" cy="47" r="8"/><circle cx="57" cy="47" r="8"/><circle cx="26" cy="60" r="5"/><circle cx="74" cy="60" r="5"/></g>`+
+      `<g fill="#2f8a62"><circle cx="40" cy="36" r="4"/><circle cx="56" cy="31" r="4"/><circle cx="67" cy="42" r="3.5"/><circle cx="31" cy="47" r="3.5"/></g>`);
+    case 'tanjiro': return s(`<defs><pattern id="${id}" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="#1b1b1b"/><rect width="5" height="5" fill="#2f8f5a"/><rect x="5" y="5" width="5" height="5" fill="#2f8f5a"/></pattern></defs>`+
+      body(`url(#${id})`)+face+
+      `<rect x="23" y="66" width="5" height="9" fill="#fff" stroke="#999" stroke-width=".6"/><circle cx="25.5" cy="70.5" r="1.8" fill="#d62828"/><rect x="72" y="66" width="5" height="9" fill="#fff" stroke="#999" stroke-width=".6"/><circle cx="74.5" cy="70.5" r="1.8" fill="#d62828"/>`+
+      eyes('#7a1e1e')+brows(false)+smile+
+      `<path d="M26 60 Q22 38 36 32 Q50 26 64 32 Q78 38 74 60 L70 49 L65 55 L61 43 L55 50 L49 41 L44 50 L40 44 L36 55 L31 48Z" fill="#4a1010"/>`+
+      `<path d="M41 33 L44 42 M55 31 L57 41 M67 37 L67 46" stroke="#b33a2a" stroke-width="2.4" stroke-linecap="round"/><path d="M33 52 q4 -3 9 0 q-4 3 -9 0" fill="#b3412e"/>`);
+    case 'yuji': return s(body('#1c2340','<path d="M30 88 Q50 100 70 88 L66 86 L34 86Z" fill="#c8323a"/>')+face+
+      `<path d="M35 69 L41 69 M59 69 L65 69" stroke="#8a2b2b" stroke-width="1.6" stroke-linecap="round"/>`+
+      eyes('#5a3a2a')+brows(true)+smile+
+      `<path d="M27 62 Q25 46 32 41 L35 58Z M73 62 Q75 46 68 41 L65 58Z" fill="#3a2a2a"/>`+
+      `<path d="M30 48 L31 32 L40 38 L44 24 L50 35 L56 23 L60 37 L69 31 L70 48 Q50 40 30 48Z" fill="#f59ab5" stroke="#d9789a" stroke-width="1.2"/>`);
+    case 'ichigo': return s(body('#141414','<path d="M38 86 L50 104 L62 86Z" fill="#f2f2f2"/><path d="M41 86 L50 100 L59 86Z" fill="#141414"/>')+face+
+      eyes('#6b3a1e')+`<path d="M34 55 L46 58 M66 55 L54 58 M47 52 L49 55 M53 52 L51 55" stroke="#2a1a10" stroke-width="2.4" stroke-linecap="round"/>`+flat+
+      `<path d="M24 60 L19 42 L30 44 L23 27 L38 34 L40 15 L50 30 L58 13 L62 32 L77 25 L70 42 L81 44 L76 60 Q72 46 50 44 Q28 46 24 60Z" fill="#ff8a1f" stroke="#d06a0a" stroke-width="1.2"/>`);
+    case 'goku': return s(body('#ff8c1a','<path d="M36 86 L50 100 L64 86Z" fill="#1e4fb0"/>')+face+
+      eyes()+brows(true)+smile+
+      `<path d="M22 60 L8 44 L23 46 L12 25 L32 36 L29 12 L44 30 L50 5 L58 28 L70 10 L68 34 L88 25 L77 46 L92 44 L78 60 Q74 44 50 42 Q26 44 22 60Z" fill="#151515"/>`+
+      `<path d="M33 52 L38 40 L43 53 L48 40 L52 52 L57 39 L62 53 L67 42 L69 50 Q50 38 33 52Z" fill="#151515"/>`);
+    case 'saitama': return s(body('#ffd23f','<path d="M14 100 Q20 88 34 86 L30 112 L10 112Z M86 100 Q80 88 66 86 L70 112 L90 112Z" fill="#f5f5f5"/><path d="M34 86 L50 94 L66 86" fill="none" stroke="#d6a800" stroke-width="2"/>')+face+
+      `<ellipse cx="41" cy="45" rx="7" ry="3.5" fill="#fff" opacity=".7"/>`+
+      `<circle cx="41" cy="63" r="2.2" fill="#1b1b1b"/><circle cx="59" cy="63" r="2.2" fill="#1b1b1b"/><path d="M36 57 L45 57 M55 57 L64 57" stroke="#2a1a10" stroke-width="1.6" stroke-linecap="round"/>`+flat);
+    case 'ghost': return s(`<g fill="#2a2150">${body('#2a2150').replace(/fill="[^"]+"/g,'')}</g><g fill="#2a2150"><ellipse cx="50" cy="62" rx="23" ry="25"/><path d="M26 60 Q24 38 50 36 Q76 38 74 60 L68 48 L60 54 L50 44 L40 54 L32 48Z"/></g>`+
+      `<ellipse cx="41" cy="63" rx="4" ry="2.4" fill="#c9b8ff"/><ellipse cx="59" cy="63" rx="4" ry="2.4" fill="#c9b8ff"/>`);
+  }
+  return s(face);
+}
+function setArt(hexEl,h){ paint(hexEl,h); hexEl.querySelector('i').innerHTML=art(h); }
+
 // Звание — по лучшему результату за минуту.
 const RANKS = [[0,'Новичок'],[10,'Ученик'],[20,'Генин'],[30,'Чунин'],[40,'Джонин'],[50,'Хокаге'],[60,'Легенда арены']];
 const rankOf = best => RANKS.filter(r=>best>=r[0]).pop()[1];
@@ -531,12 +640,14 @@ function renderMenu(){
     const sub = !open ? (h.id==='ghost'?'Откроется после первого боя':'Победите '+HEROES[i-1].name) : h.sub;
     const pace = h.id==='ghost' ? (best.reps? best.reps+' в мин':'—') : '~'+heroPace(h)+' в мин';
     const tier = h.boss ? 'ФИНАЛЬНЫЙ БОСС' : h.id==='ghost' ? 'САМ ПРОТИВ СЕБЯ' : '#'+(i+1);
-    const hex = `<div class="hex ${open?'':'lock'}"><i>${open?h.em:'🔒'}</i></div>`;
-    const body = `<b>${esc(h.name)}</b><small>${esc(sub)}</small><span class="pace">${pace}</span>`;
-    return `<button class="card ${sel?'sel':''} ${open?'':'lock'} ${h.boss||h.id==='ghost'?'boss':''}" style="--c1:${h.c1};--c2:${h.c2}"
+    const hex = `<div class="hex ${open?'':'lock'}"><i>${art(h)}</i></div>`;
+    const pips = h.id==='ghost' ? '' : `<div class="power" aria-label="Сила ${Math.round(h.pace/7)} из 6">${Array.from({length:6},(_,k)=>`<i class="${k<Math.round(h.pace/7)?'on':''}"></i>`).join('')}</div>`;
+    const body = `<b>${esc(h.name)}</b><small>${esc(sub)}</small>${pips}<span class="pace">${pace}</span>`;
+    const wide = h.boss||h.id==='ghost';
+    return `<button class="card ${sel?'sel':''} ${open?'':'lock'} ${wide?'boss':''} ${h.boss?'final':''}" style="--c1:${h.c1};--c2:${h.c2}"
       role="radio" aria-checked="${sel}" ${open?'':'disabled'} data-id="${h.id}">
-      ${h.boss||h.id==='ghost' ? hex+`<div class="txt"><span class="tier">${tier}</span>${body}</div>` : `<span class="tier">${tier}</span>${hex}${body}`}
-      ${won?'<span class="done">✓</span>':''}</button>`;
+      ${wide ? hex+`<div class="txt"><span class="tier">${tier}</span>${body}</div>` : `<span class="tier">${tier}</span>${hex}${body}`}
+      ${open?'':'<span class="lk">🔒</span>'}${won?'<span class="done">✓</span>':''}</button>`;
   }).join('');
   $('roster').querySelectorAll('.card').forEach(b=>b.onclick=()=>{ selId=b.dataset.id; store.set('selHero',selId); renderMenu(); });
 
@@ -549,9 +660,34 @@ function renderMenu(){
   $('chart').innerHTML=last.map(h=>`<i class="${h.reps===best.reps&&h.reps>0?'best':h.win?'win':''}" style="height:${Math.max(6,h.reps/max*100)}%"></i>`).join('');
   $('chart').hidden=!last.length;
 
-  const h=heroById(selId); paint($('ctaHex'),h); $('ctaHex').firstChild.textContent=h.em;
+  const h=heroById(selId); setArt($('ctaHex'),h);
   $('ctaTxt').textContent = 'В бой: '+h.name;
+  renderPics();
 }
+function renderPics(){
+  $('pics').innerHTML = HEROES.filter(h=>h.id!=='ghost').map(h=>`
+    <div class="pic"><div class="hex" style="--c1:${h.c1};--c2:${h.c2}"><i>${art(h)}</i></div><b>${esc(h.name)}</b>
+      <button class="set" data-pick="${h.id}">${customImgs[h.id]?'Заменить':'Выбрать фото'}</button>
+      ${customImgs[h.id]?`<button data-clear="${h.id}">Убрать</button>`:'<span></span>'}</div>`).join('');
+  $('pics').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{ picFor=b.dataset.pick; $('picFile').value=''; $('picFile').click(); });
+  $('pics').querySelectorAll('[data-clear]').forEach(b=>b.onclick=()=>{ delete customImgs[b.dataset.clear]; try{localStorage.removeItem('pm_img_'+b.dataset.clear);}catch(e){} renderMenu(); });
+}
+let picFor=null;
+$('openPics').onclick=()=>{ $('picsBox').open=true; $('picsBox').scrollIntoView({behavior:'smooth',block:'start'}); };
+$('picFile').addEventListener('change',async()=>{
+  const f=$('picFile').files[0]; if(!f||!picFor) return;
+  try{
+    const url=URL.createObjectURL(f); const im=new Image(); im.src=url; await im.decode();
+    // Обрезаем по центру под пропорцию жетона (сверху — чтобы лицо попадало в кадр) и уменьшаем.
+    const W=240,H=269, r=Math.max(W/im.naturalWidth,H/im.naturalHeight), sw=W/r, sh=H/r;
+    const sx=(im.naturalWidth-sw)/2, sy=Math.max(0,(im.naturalHeight-sh)*0.3);
+    const c=document.createElement('canvas'); c.width=W; c.height=H; c.getContext('2d').drawImage(im,sx,sy,sw,sh,0,0,W,H);
+    URL.revokeObjectURL(url);
+    const data=c.toDataURL('image/jpeg',.82);
+    localStorage.setItem('pm_img_'+picFor,data); customImgs[picFor]=data;
+  }catch(e){ $('menuErr').textContent='Не получилось сохранить картинку. Попробуйте другую или освободите место в браузере.'; $('menuErr').hidden=false; }
+  renderMenu();
+});
 ['diff','sens','sound'].forEach(id=>{
   const el=$(id), v=store.get('opt_'+id,null);
   if(v!=null){ if(el.type==='checkbox') el.checked=v; else el.value=v; }
@@ -634,7 +770,7 @@ function renderScore(){
 const sleep = ms => new Promise(r=>setTimeout(r,ms));
 async function intro(){
   const h=game.hero, vs=$('vs');
-  paint(vs,h); paint($('vsHex'),h); $('vsEm').textContent=h.em; $('vsName').textContent=h.name;
+  paint(vs,h); setArt($('vsHex'),h); $('vsName').textContent=h.name;
   $('vsLine').textContent = h.id==='ghost' ? `Ваш рекорд: ${best.reps}` : `${h.sub} · ~${heroPace(h)} в мин`;
   $('vsMe').textContent = `${rankOf(best.reps)} · рекорд ${best.reps}`;
   vs.hidden=false; [...vs.children].forEach(el=>{ el.style.animation='none'; void el.offsetWidth; el.style.animation=''; });
@@ -661,7 +797,7 @@ async function startBattle(mode){
       stopAll(); show('menu');
       const denied = e && e.name==='NotAllowedError';
       const msg = denied && isStandalone() ? 'Ярлык открыл игру как отдельное приложение, и iPhone не даёт там камеру. Откройте игру в Safari по ссылке cofeekaa.github.io/pushup — или пересоздайте ярлык с выключенным «Открыть как веб-приложение».'
-                : denied ? 'Доступ к камере запрещён. На iPhone: «аА» в адресной строке → «Настройки веб-сайта» → Камера → Разрешить. Потом обновите страницу.'
+                : denied ? 'Браузер запомнил запрет камеры и больше не спрашивает. На iPhone: Настройки → Приложения → Safari → Камера → «Спрашивать». Затем в Safari: «аА» → «Настройки веб-сайта» → Камера → «Разрешить». Обновите страницу.'
                 : e && e.name==='NotFoundError' ? 'Камера не найдена.'
                 : (e && e.message && /https/.test(e.message)) ? e.message
                 : 'Не получилось запустить камеру или распознавание: '+(e&&e.message||e)+'. Проверьте интернет или играйте кнопкой.';
@@ -675,8 +811,8 @@ async function beginRound(){
   const h=heroById(selId);
   game.hero=h; game.my=0; game.foeN=0; game.myTimes=[]; game.running=false; game.over=false; game.lead=0; game.counter.reset();
   game.sched = h.id==='ghost' ? best.times.slice() : monsterSchedule(heroPace(h), ROUND_SECS);
-  paint($('battle'),h); paint($('hFoeHex'),h); paint($('heroHex'),h);
-  $('hEm').textContent=h.em; $('heroEm').textContent=h.em; $('hName').textContent=h.name;
+  paint($('battle'),h); setArt($('hFoeHex'),h); setArt($('heroHex'),h);
+  $('hName').textContent=h.name;
   $('hFoeSub').textContent = h.id==='ghost' ? 'ваш рекорд' : '~'+heroPace(h)+' в мин';
   $('hMyRank').textContent = rankOf(best.reps);
   $('hero').className='hero idle';
@@ -772,7 +908,8 @@ async function endRound(){
   const idx=HEROES.indexOf(h), next=HEROES[idx+1];
   $('result').classList.toggle('lose',!win);
   if(win){ $('rHex').style.setProperty('--c1','var(--gold)'); $('rHex').style.setProperty('--c2','#8a5a00'); $('rEm').textContent = h.boss?'👑':'🏆'; }
-  else { paint($('rHex'),h); $('rEm').textContent = draw ? '🤝' : h.em; }
+  else if(draw){ paint($('rHex'),h); $('rEm').textContent='🤝'; }
+  else setArt($('rHex'),h);
   $('rLabel').textContent = win ? 'Победа' : draw ? 'Ничья' : 'Поражение';
   $('rTitle').textContent = h.id==='ghost'
       ? (win ? 'Вы побили свой рекорд!' : draw ? 'Ровно как в лучший раз' : 'Тень оказалась быстрее')
@@ -797,7 +934,7 @@ function stopAll(){ game.running=false; game.hero=null; cancelAnimationFrame(gam
   $('count').hidden=true; $('vs').hidden=true; try{wakeLock&&wakeLock.release();}catch(e){} wakeLock=null; }
 function backToMenu(){ stopAll(); renderMenu(); show('menu'); }
 
-$('startCam').onclick=()=>startBattle('cam');
+$('startCam').onclick=()=>{ askPersist(); startBattle('cam'); };
 $('startManual').onclick=()=>startBattle('manual');
 $('resetProgress').onclick=()=>{
   const b=$('resetProgress');
@@ -824,6 +961,30 @@ document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==
 }catch(e){} })();
 
 window.__pushup = {jointAngle, elbowAngleFromPose, PushupCounter, SENS, monsterSchedule, levelOf, rankOf};
+/* ===================== Сохранность прогресса ===================== */
+// Просим браузер не удалять данные сайта при нехватке места (Safari иначе может стереть их через неделю без входа).
+function askPersist(){ try{ navigator.storage?.persist?.(); }catch(e){} }
+askPersist();
+const b64 = s => btoa(unescape(encodeURIComponent(s)));
+const unb64 = s => decodeURIComponent(escape(atob(s)));
+$('backupCopy').onclick=async()=>{
+  const code='PUSHUP1:'+b64(JSON.stringify({history, best, beaten, total:totalReps}));
+  $('backupText').value=code;
+  try{ await navigator.clipboard.writeText(code); $('backupMsg').textContent='Код скопирован. Вставьте его в Заметки.'; }
+  catch(e){ $('backupText').focus(); $('backupText').select(); $('backupMsg').textContent='Выделите код в поле выше и скопируйте вручную.'; }
+};
+$('backupRestore').onclick=()=>{
+  try{
+    const raw=$('backupText').value.trim(); if(!raw.startsWith('PUSHUP1:')) throw 0;
+    const d=JSON.parse(unb64(raw.slice(8)));
+    if(!d || typeof d.total!=='number' || !d.best) throw 0;
+    history=Array.isArray(d.history)?d.history:[]; best=d.best; beaten=d.beaten||{}; totalReps=d.total;
+    store.set('history',history); store.set('best',best); store.set('beatenH',beaten); store.set('total',totalReps);
+    $('backupMsg').textContent=`Готово: восстановлено ${totalReps} отжиманий, рекорд ${best.reps}.`; renderMenu();
+  }catch(e){ $('backupMsg').textContent='Код не подошёл. Вставьте его целиком, он начинается с PUSHUP1:'; }
+};
+
+loadCustomImgs();
 renderMenu();
 </script>
 </body>
