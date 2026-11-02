@@ -308,6 +308,7 @@ details.howto .in{display:flex;flex-direction:column;gap:10px;padding-bottom:14p
     </div>
 
     <div id="menuErr" class="err" hidden></div>
+    <a class="btn primary" id="openSafari" href="x-safari-https://cofeekaa.github.io/pushup/" hidden style="text-decoration:none">Открыть в Safari — там камера работает</a>
 
     <details class="howto" id="howto">
       <summary>Как поставить телефон</summary>
@@ -787,7 +788,7 @@ async function intro(){
 }
 
 async function startBattle(mode, pendingCam){
-  $('menuErr').hidden=true;
+  $('menuErr').hidden=true; $('openSafari').hidden=true;
   game.mode=mode;
   game.counter=new PushupCounter(SENS[$('sens').value]||SENS.normal);
   show('battle'); $('battle').classList.toggle('nocam', mode!=='cam'); $('gauge').hidden = mode!=='cam';
@@ -802,7 +803,8 @@ async function startBattle(mode, pendingCam){
     }catch(e){
       stopAll(); show('menu');
       const denied = e && e.name==='NotAllowedError';
-      const msg = denied && isStandalone() ? 'iPhone запомнил запрет камеры для этого ярлыка и больше не спрашивает. Удалите ярлык с экрана «Домой» и добавьте его заново — при первом нажатии «В бой» iPhone снова спросит про камеру, нажмите «Разрешить».'
+      $('openSafari').hidden = !isStandalone();
+      const msg = isStandalone() ? 'В режиме ярлыка iPhone не даёт игре камеру. Нажмите кнопку ниже — игра откроется в Safari, где камера работает. Прогресс в Safari хранится отдельно: перенесите его через «Резервную копию прогресса».'
                 : denied && /CriOS/.test(navigator.userAgent) ? 'Chrome на iPhone не получил доступ к камере. Откройте Настройки iPhone → Приложения → Chrome и включите «Камера». Потом вернитесь сюда и нажмите «В бой» ещё раз — Chrome спросит разрешение.'
                 : denied ? 'Браузер запомнил запрет камеры и больше не спрашивает. На iPhone: Настройки → Приложения → Safari → Камера → «Спрашивать». Затем в Safari: «аА» → «Настройки веб-сайта» → Камера → «Разрешить». Обновите страницу.'
                 : e && e.name==='NotFoundError' ? 'Камера не найдена.'
