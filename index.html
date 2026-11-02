@@ -141,6 +141,22 @@ details.howto .in{display:flex;flex-direction:column;gap:10px;padding-bottom:14p
 .btn.ghost{border:2px solid var(--line);color:var(--paper);font-size:15px;padding:12px}
 .btn .hex{--s:28px;padding:2px}
 
+/* ---------- дуэль ---------- */
+.duel{background:linear-gradient(160deg,#10263a,var(--panel));border:1px solid #1f4a6b;border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.duel .dHead{display:flex;gap:12px;align-items:center}
+.duel .dHead .hex{--s:52px}
+.duel h2{font-size:20px}
+.duel .nm{display:flex;flex-direction:column;gap:6px;color:var(--muted);font-size:12px}
+input.txt{background:var(--panel-2);color:var(--paper);border:1px solid var(--line);border-radius:10px;padding:11px 12px;font:16px var(--body);width:100%;user-select:text;-webkit-user-select:text}
+.btn.sky{background:linear-gradient(180deg,#6fd8ff,#36c5ff);color:#03202e;box-shadow:0 4px 0 #13759c;font-size:17px;padding:14px}
+.btn.sky:active{transform:translateY(3px);box-shadow:0 1px 0 #13759c}
+.lobby{position:absolute;left:0;right:0;top:calc(150px + env(safe-area-inset-top,0px));z-index:4;display:flex;justify-content:center;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.lobby .box{max-width:440px;width:100%;background:rgba(13,11,20,.94);border:1px solid #1f4a6b;border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px;text-align:center}
+.lobby h2{font-size:21px}
+.lobby .btn.ghost{font-size:15px;padding:11px}
+.lobby .note.warn{color:var(--gold)}
+
 /* ---------- бой ---------- */
 #battle{padding:0;overflow:hidden;background:#000}
 #cam,#skel{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
@@ -307,6 +323,15 @@ details.howto .in{display:flex;flex-direction:column;gap:10px;padding-bottom:14p
       <label class="chk" for="sound"><input type="checkbox" id="sound" checked> Звук и вибрация</label>
     </div>
 
+    <div class="duel">
+      <div class="dHead"><div class="hex" style="--c1:#36c5ff;--c2:#0f3a66"><i>🤜</i></div>
+        <div><h2>Дуэль с другом</h2><p class="note">Живой бой на минуту: кто больше отожмётся. Другу придёт только ссылка на этот бой — без вашей игры и прогресса. После боя ссылка перестаёт работать.</p></div></div>
+      <label class="nm" for="duelName">Ваше имя для друга
+        <input class="txt" id="duelName" maxlength="20" placeholder="Например, Чемпион" autocomplete="off">
+      </label>
+      <button class="btn sky" id="startDuel">⚔️ Создать бой и позвать друга</button>
+    </div>
+
     <div id="menuErr" class="err" hidden></div>
     <a class="btn primary" id="openSafari" href="x-safari-https://cofeekaa.github.io/pushup/" hidden style="text-decoration:none">Открыть в Safari — там камера работает</a>
 
@@ -416,6 +441,17 @@ details.howto .in{display:flex;flex-direction:column;gap:10px;padding-bottom:14p
     <div class="p b"><div class="hex" id="vsHex"><i id="vsEm">🍥</i></div><b id="vsName">Наруто</b><small id="vsLine"></small></div>
   </div>
   <div class="count" id="count" hidden></div>
+  <div class="lobby" id="lobby" hidden>
+    <div class="box">
+      <span class="label">Дуэль с другом</span>
+      <h2>Отправьте другу ссылку</h2>
+      <p class="note">Друг откроет её на своём телефоне и нажмёт «Принять бой». Отсчёт начнётся у обоих сам. А вы пока поставьте телефон.</p>
+      <input class="txt" id="lbLink" readonly style="font-size:13px;text-align:center">
+      <button class="btn sky" id="lbShare">Отправить ссылку</button>
+      <button class="btn ghost" id="lbCopy">Скопировать</button>
+      <p class="note" id="lbStatus" role="status">Создаю бой…</p>
+    </div>
+  </div>
 </section>
 
 <!-- ============ ИТОГИ ============ -->
@@ -601,6 +637,8 @@ function art(h){
     case 'saitama': return s(body('#ffd23f','<path d="M14 100 Q20 88 34 86 L30 112 L10 112Z M86 100 Q80 88 66 86 L70 112 L90 112Z" fill="#f5f5f5"/><path d="M34 86 L50 94 L66 86" fill="none" stroke="#d6a800" stroke-width="2"/>')+face+
       `<ellipse cx="41" cy="45" rx="7" ry="3.5" fill="#fff" opacity=".7"/>`+
       `<circle cx="41" cy="63" r="2.2" fill="#1b1b1b"/><circle cx="59" cy="63" r="2.2" fill="#1b1b1b"/><path d="M36 57 L45 57 M55 57 L64 57" stroke="#2a1a10" stroke-width="1.6" stroke-linecap="round"/>`+flat);
+    case 'friend': return s(body('#1d6fa5','<path d="M36 86 L50 98 L64 86" fill="#0f3a66"/>')+face+eyes()+brows(true)+grin+
+      `<path d="M25 60 Q22 36 50 33 Q78 36 75 60 L70 46 L62 52 L56 41 L50 49 L43 40 L37 52 L30 46Z" fill="#2a1a10"/>`);
     case 'ghost': return s(`<g fill="#2a2150">${body('#2a2150').replace(/fill="[^"]+"/g,'')}</g><g fill="#2a2150"><ellipse cx="50" cy="62" rx="23" ry="25"/><path d="M26 60 Q24 38 50 36 Q76 38 74 60 L68 48 L60 54 L50 44 L40 54 L32 48Z"/></g>`+
       `<ellipse cx="41" cy="63" rx="4" ry="2.4" fill="#c9b8ff"/><ellipse cx="59" cy="63" rx="4" ry="2.4" fill="#c9b8ff"/>`);
   }
@@ -792,7 +830,8 @@ async function startBattle(mode, pendingCam){
   game.mode=mode;
   game.counter=new PushupCounter(SENS[$('sens').value]||SENS.normal);
   show('battle'); $('battle').classList.toggle('nocam', mode!=='cam'); $('gauge').hidden = mode!=='cam';
-  paint($('battle'),heroById(selId));
+  paint($('battle'), duel ? FRIEND : heroById(selId));
+  $('manualHit').hidden = !!duel;
   keepAwake();
   if(mode==='cam'){
     setStatus('Включаю камеру…');
@@ -813,6 +852,7 @@ async function startBattle(mode, pendingCam){
       $('menuErr').textContent=msg; $('menuErr').hidden=false; $('menuErr').scrollIntoView({block:'center'}); return;
     }
   }
+  if(duel){ openLobby(duel); return; }
   beginRound();
 }
 
@@ -887,6 +927,7 @@ function myRep(){
   if(!game.running) return;
   game.my++; game.myTimes.push(+((performance.now()-game.startT)/1000).toFixed(2));
   totalReps++; store.set('total', totalReps);
+  if(duel && duel.started) dbReq(`${duel.code}/h/s`,'PUT',game.my).catch(()=>{});
   renderScore(); checkLead();
   replay($('hero'),'hit'); replay($('slash'),'go'); replay($('flash'),'go');
   popText('me','+1'); beep('hit'); buzz(40);
@@ -901,13 +942,16 @@ $('heroHex').addEventListener('animationend',e=>{ const m=$('hero'); if(game.run
 async function endRound(){
   if(game.over) return;
   game.running=false; game.over=true;
+  const du=duel;
+  if(du){ await finishDuel(du); if(duel!==du) return; }
   const h=game.hero, win=game.my>game.foeN, draw=game.my===game.foeN;
   const prev=history.length ? history[history.length-1].reps : null;
   const lvBefore=levelOf(totalReps-game.my).lvl;
   const isRecord = game.my>best.reps;
   if(isRecord){ best={reps:game.my, times:game.myTimes.slice()}; store.set('best',best); }
-  if(win){ beaten[h.id]=true; store.set('beatenH',beaten); }
-  history.push({d:Date.now(), foe:h.id, reps:game.my, foeReps:game.foeN, win, diff:diffK()});
+  if(win && !du){ beaten[h.id]=true; store.set('beatenH',beaten); }
+  history.push(du ? {d:Date.now(), foe:'friend', reps:game.my, foeReps:game.foeN, win, duel:true}
+                  : {d:Date.now(), foe:h.id, reps:game.my, foeReps:game.foeN, win, diff:diffK()});
   history=history.slice(-100); store.set('history',history);
 
   $('hero').className = win ? 'hero dead' : 'hero gloat';
@@ -920,12 +964,16 @@ async function endRound(){
   else if(draw){ paint($('rHex'),h); $('rEm').textContent='🤝'; }
   else setArt($('rHex'),h);
   $('rLabel').textContent = win ? 'Победа' : draw ? 'Ничья' : 'Поражение';
-  $('rTitle').textContent = h.id==='ghost'
+  $('rTitle').textContent = du
+      ? (win ? `Вы победили: ${h.name}!` : draw ? 'Ничья!' : `${h.name} сделал больше`)
+      : h.id==='ghost'
       ? (win ? 'Вы побили свой рекорд!' : draw ? 'Ровно как в лучший раз' : 'Тень оказалась быстрее')
       : (win ? (h.boss ? 'Чемпион арены!' : `${h.name} повержен!`) : draw ? 'Ничья!' : `${h.name} оказался быстрее`);
   $('rMe').textContent=game.my; $('rFoe').textContent=game.foeN;
   $('rRecord').hidden=!isRecord;
-  $('rText').textContent = win ? h.win + (next && !h.boss && next.id!=='ghost' ? ` Открыт следующий соперник: ${next.name}.` : '')
+  $('rText').textContent = du
+      ? (win ? 'Победа в дуэли! ' : draw ? 'Ровно поровну. ' : `Не хватило ${game.foeN-game.my+1}. `) + 'Ссылка друга больше не работает — для реванша создайте новый бой.'
+      : win ? h.win + (next && !h.boss && next.id!=='ghost' ? ` Открыт следующий соперник: ${next.name}.` : '')
                           : draw ? 'Нужно хотя бы на одно отжимание больше, чтобы победить.'
                           : `Не хватило ${game.foeN-game.my+1}. Отдохните и возьмите реванш — или поставьте сложность полегче.`;
   $('rBest').textContent=best.reps; $('rTotal').textContent=totalReps;
@@ -934,14 +982,147 @@ async function endRound(){
   $('rLevel').textContent=`Уровень ${lv.lvl} · ${rankOf(best.reps)}` + (lv.lvl>lvBefore?' — новый уровень!':'');
   $('rXpTxt').textContent=`+${game.my} опыта`;
   $('rXp').style.width=(lv.cur/lv.need*100)+'%';
-  const nextOpen = win && next && next.id!=='ghost' && !h.boss;
+  const nextOpen = !du && win && next && next.id!=='ghost' && !h.boss;
   $('rNext').hidden=!nextOpen; if(nextOpen) $('rNext').textContent=`Дальше: ${next.name}`;
+  $('rAgain').textContent = du ? 'Новая дуэль' : 'Реванш';
   show('result');
 }
 
-function stopAll(){ game.running=false; game.hero=null; cancelAnimationFrame(game.raf); game.raf=0; stopCamera();
+function stopAll(){ closeDuel(); game.running=false; game.hero=null; cancelAnimationFrame(game.raf); game.raf=0; stopCamera();
   $('count').hidden=true; $('vs').hidden=true; try{wakeLock&&wakeLock.release();}catch(e){} wakeLock=null; }
 function backToMenu(){ stopAll(); renderMenu(); show('menu'); }
+
+/* ===================== Дуэль с другом ===================== */
+// Комната боя живёт в Firebase Realtime Database (через REST, без библиотек). Друг открывает отдельный сайт —
+// там только этот бой. После боя комната удаляется, и ссылка друга перестаёт работать.
+const DUEL_DB='https://arena-duel-dc3e7-default-rtdb.europe-west1.firebasedatabase.app';
+const DUEL_SITE='https://arena-duel-dc3e7.web.app/';
+const FRIEND={id:'friend', em:'🤜', name:'Друг', c1:'#36c5ff', c2:'#0f3a66', pace:0, sub:'Живой соперник', win:'', taunt:['Догоняй!','Я впереди!','Не отставай!']};
+let duel=null;   // {code, name, es, off, room, go, started, finished, delTimer}
+
+async function dbReq(path, method='GET', body){
+  const r=await fetch(`${DUEL_DB}/rooms/${path}.json`, {method, body: body===undefined?undefined:JSON.stringify(body)});
+  if(!r.ok) throw new Error('сервер ответил '+r.status);
+  return r.json();
+}
+// Разница между часами телефона и сервера — чтобы отсчёт 3-2-1 шёл у обоих одновременно.
+async function dbClock(code, who){
+  let bestRtt=1e9, off=0;
+  for(let i=0;i<3;i++){
+    const a=Date.now(); const ts=await dbReq(`${code}/clk/${who}`,'PUT',{'.sv':'timestamp'}); const b=Date.now();
+    if(b-a<bestRtt){ bestRtt=b-a; off=ts-(a+b)/2; }
+  }
+  return off;
+}
+function dbListen(code, onRoom){
+  let room=null; const es=new EventSource(`${DUEL_DB}/rooms/${code}.json`);
+  const setAt=(path,val)=>{
+    const k=path.split('/').filter(Boolean);
+    if(!k.length){ room=val; return; }
+    if(room==null||typeof room!=='object') room={};
+    let o=room; for(const p of k.slice(0,-1)){ if(o[p]==null||typeof o[p]!=='object') o[p]={}; o=o[p]; }
+    if(val===null) delete o[k[k.length-1]]; else o[k[k.length-1]]=val;
+  };
+  es.addEventListener('put',e=>{ const d=JSON.parse(e.data); setAt(d.path,d.data); onRoom(room); });
+  es.addEventListener('patch',e=>{ const d=JSON.parse(e.data); for(const [k,v] of Object.entries(d.data||{})) setAt(d.path+'/'+k,v); onRoom(room); });
+  es.addEventListener('cancel',()=>{ es.close(); onRoom(null); });
+  return es;
+}
+function newRoomCode(){ const a='abcdefghijkmnpqrstuvwxyz23456789', b=crypto.getRandomValues(new Uint8Array(10)); return [...b].map(x=>a[x%32]).join(''); }
+function lbStatus(t,warn){ $('lbStatus').textContent=t; $('lbStatus').classList.toggle('warn',!!warn); }
+
+function startDuel(){
+  const cam=requestCameraNow(); askPersist();
+  closeDuel();
+  const name=($('duelName').value.trim()||'Соперник').slice(0,20); store.set('duelName',name);
+  FRIEND.name='Друг';
+  duel={code:newRoomCode(), name, es:null, off:0, room:null, go:false, started:false, finished:false, delTimer:0};
+  startBattle('cam', cam);
+}
+function closeDuel(){
+  const d=duel; if(!d) return; duel=null;
+  if(d.es) d.es.close(); clearTimeout(d.delTimer);
+  dbReq(d.code,'DELETE').catch(()=>{});
+  $('lobby').hidden=true; $('manualHit').hidden=false;
+}
+async function openLobby(d){
+  const h=FRIEND;
+  game.hero=null; game.my=0; game.foeN=0; game.running=false; game.over=false; game.counter.reset();
+  paint($('battle'),h); setArt($('hFoeHex'),h); setArt($('heroHex'),h);
+  $('hName').textContent=h.name; $('hFoeSub').textContent='дуэль'; $('hMyRank').textContent=rankOf(best.reps);
+  $('hero').className='hero idle'; $('timer').textContent=fmt(ROUND_SECS); $('timer').classList.remove('low'); renderScore();
+  $('lbLink').value=DUEL_SITE+'?r='+d.code; $('lobby').hidden=false; lbStatus('Создаю бой…');
+  setStatus('Поставьте телефон, пока друг подключается');
+  if(!game.raf) loop();
+  try{
+    await dbReq(d.code,'PUT',{c:{'.sv':'timestamp'}, st:'wait', h:{n:d.name, r:true, s:0}});
+    d.off=await dbClock(d.code,'h');
+  }catch(e){ if(duel===d) lbStatus('Не получилось создать бой ('+(e.message||e)+'). Проверьте интернет и нажмите «Выйти», потом попробуйте ещё раз.',true); return; }
+  if(duel!==d) return;
+  lbStatus('Ждём друга по ссылке…');
+  d.es=dbListen(d.code, room=>onDuelRoom(d,room));
+}
+function onDuelRoom(d, room){
+  if(duel!==d || d.finished) return;
+  d.room=room;
+  if(!room){ lbStatus('Бой закрыт. Нажмите «Выйти» и создайте новый.',true); return; }
+  const g=room.g;
+  if(g && g.n && FRIEND.name!==g.n){ FRIEND.name=g.n; $('hName').textContent=g.n; }
+  if(room.st==='wait'){
+    if(g && g.r){
+      lbStatus(`${FRIEND.name} готов! Начинаем…`);
+      if(!d.go){ d.go=true; dbReq(d.code,'PATCH',{st:'go', t0:Math.round(Date.now()+d.off+4000)}).catch(()=>{ d.go=false; lbStatus('Связь пропала. Ждём…',true); }); }
+    } else if(g) lbStatus(`${FRIEND.name} открыл ссылку и включает камеру…`);
+  }
+  if(room.st==='go' && room.t0 && !d.started){ d.started=true; $('lobby').hidden=true; beginDuelRound(d, room.t0); }
+  if(d.started && g){ const s=g.s|0; while(game.foeN<s) foeRep(); }
+}
+async function beginDuelRound(d, t0){
+  const h=FRIEND;
+  game.hero=h; game.my=0; game.foeN=0; game.myTimes=[]; game.sched=[]; game.running=false; game.over=false; game.lead=0; game.counter.reset();
+  setArt($('hFoeHex'),h); setArt($('heroHex'),h); $('hName').textContent=h.name; renderScore();
+  setStatus('Встаньте в упор лёжа на прямые руки');
+  // Бой начинается в t0+3000 по часам сервера; переводим в часы этого телефона.
+  const startPerf = performance.now() + (t0+3000 - (Date.now()+d.off));
+  const until=t=>sleep(Math.max(0,t-performance.now()));
+  const vs=$('vs');
+  paint(vs,h); setArt($('vsHex'),h); $('vsName').textContent=h.name; $('vsLine').textContent='Живой соперник · дуэль';
+  $('vsMe').textContent=`${rankOf(best.reps)} · рекорд ${best.reps}`;
+  vs.hidden=false; [...vs.children].forEach(el=>{ el.style.animation='none'; void el.offsetWidth; el.style.animation=''; });
+  beep('vs');
+  await until(startPerf-3000); vs.hidden=true;
+  const el=$('count'); el.hidden=false; el.classList.remove('small');
+  for(const [n,k] of [['3',3000],['2',2000],['1',1000]]){
+    if(duel!==d) return;
+    if(performance.now() > startPerf-k+900) continue;
+    el.innerHTML=`<span>${n}</span>`; beep('tick'); await until(startPerf-k+1000);
+  }
+  if(duel!==d) return;
+  el.classList.add('small'); el.innerHTML='<span>В БОЙ!</span>'; setTimeout(()=>{ el.hidden=true; },600);
+  game.startT=startPerf; game.running=true;
+}
+async function finishDuel(d){
+  dbReq(`${d.code}/h/s`,'PUT',game.my).catch(()=>{});
+  setStatus(`Время! Ждём последний счёт: ${FRIEND.name}…`);
+  await sleep(2500);
+  if(duel!==d) return;
+  d.finished=true;
+  if(d.es){ d.es.close(); d.es=null; }
+  dbReq(d.code,'PATCH',{st:'end', fin:{h:game.my, g:game.foeN}}).catch(()=>{});
+  d.delTimer=setTimeout(()=>{ dbReq(d.code,'DELETE').catch(()=>{}); }, 30000);
+}
+$('startDuel').onclick=startDuel;
+$('duelName').value=store.get('duelName','');
+$('lbShare').onclick=async()=>{
+  const url=$('lbLink').value;
+  try{ if(navigator.share){ await navigator.share({title:'Дуэль отжиманий', text:'Вызываю тебя на дуэль отжиманий — кто больше за минуту!', url}); return; } }catch(e){ if(e && e.name==='AbortError') return; }
+  $('lbCopy').click();
+};
+$('lbCopy').onclick=async()=>{
+  try{ await navigator.clipboard.writeText($('lbLink').value); $('lbCopy').textContent='Скопировано ✓'; }
+  catch(e){ $('lbLink').focus(); $('lbLink').select(); $('lbCopy').textContent='Выделено — скопируйте'; }
+  setTimeout(()=>{ $('lbCopy').textContent='Скопировать'; },2500);
+};
 
 $('startCam').onclick=()=>{ const cam=requestCameraNow(); askPersist(); startBattle('cam', cam); };
 $('startManual').onclick=()=>startBattle('manual');
@@ -956,7 +1137,7 @@ $('resetProgress').onclick=()=>{
 $('manualHit').onclick=()=>myRep();
 $('quit').onclick=backToMenu;
 $('rMenu').onclick=backToMenu;
-$('rAgain').onclick=()=>{ show('battle'); beginRound(); };
+$('rAgain').onclick=()=>{ if(game.hero && game.hero.id==='friend'){ startDuel(); return; } show('battle'); beginRound(); };
 $('rNext').onclick=()=>{ const i=HEROES.findIndex(h=>h.id===selId); selId=HEROES[i+1].id; store.set('selHero',selId); show('battle'); beginRound(); };
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && game.running) keepAwake(); });
 
