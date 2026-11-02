@@ -157,6 +157,35 @@ input.txt{background:var(--panel-2);color:var(--paper);border:1px solid var(--li
 .lobby .btn.ghost{font-size:15px;padding:11px}
 .lobby .note.warn{color:var(--gold)}
 
+/* ---------- вкладки и мини-игра ---------- */
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:5px}
+.tabs button{padding:11px 8px;border-radius:10px;font:15px var(--display);color:var(--muted)}
+.tabs button[aria-selected="true"]{background:linear-gradient(180deg,#ff8a3d,var(--chakra));color:#1d0c00}
+.tabPane{display:flex;flex-direction:column;gap:20px}
+.mini{background:linear-gradient(160deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.mini h2{font-size:24px}
+.miniArt svg{width:100%;height:auto;display:block;border-radius:12px}
+.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+#fly{padding:0;overflow:hidden;background:#000}
+#flyCam,#flyCv{position:absolute;inset:0;width:100%;height:100%}
+#flyCam{object-fit:cover;transform:scaleX(-1);filter:saturate(.6) brightness(.55)}
+.flyHud{position:absolute;left:0;right:0;top:0;z-index:3;padding-top:max(10px,env(safe-area-inset-top,0px));
+  padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
+.flyBar{max-width:520px;margin:0 auto;background:rgba(13,11,20,.85);border:1px solid var(--line);border-radius:14px;padding:8px 14px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+.flyBar b{font:20px var(--display);color:var(--gold);font-variant-numeric:tabular-nums;margin-right:6px}
+.flyBar span{font-size:11px;color:var(--muted)}
+.flyBar .r{text-align:right}
+.hearts{font-size:16px;letter-spacing:2px}
+.flyStatus{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+.flyOver{position:absolute;inset:0;z-index:6;display:grid;place-items:center;background:rgba(13,11,20,.75);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.flyOver .box{max-width:400px;width:100%;border:1px solid #6b2a1e;border-radius:18px;padding:22px 20px;display:flex;flex-direction:column;gap:12px;text-align:center;
+  background:repeating-conic-gradient(from 0deg at 50% 0%,rgba(255,255,255,.04) 0deg 3deg,transparent 3deg 10deg),linear-gradient(180deg,#3a1420,var(--panel) 60%);
+  box-shadow:0 20px 60px -20px rgba(255,107,26,.5);animation:pop .5s ease-out}
+.flyOver h2{font-size:28px}
+.flyOver .final .a{color:var(--gold);font-size:64px;text-shadow:0 4px 0 #8a3a00}
+.flyBar b#flyScore{font-size:24px}
+
 /* ---------- бой ---------- */
 #battle{padding:0;overflow:hidden;background:#000}
 #cam,#skel{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
@@ -206,6 +235,7 @@ input.txt{background:var(--panel-2);color:var(--paper);border:1px solid var(--li
 .status{position:absolute;left:0;right:0;bottom:calc(140px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;z-index:3;pointer-events:none;padding:0 16px}
 .status div{background:rgba(13,11,20,.88);border-radius:999px;padding:8px 16px;font-size:14px;text-align:center;max-width:440px}
 .status div.warn{color:var(--gold)}
+.status div:empty{display:none}
 .controls{position:absolute;left:0;right:0;bottom:0;z-index:3;padding-bottom:max(12px,env(safe-area-inset-bottom,0px));
   padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
 .controls .inner{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
@@ -301,6 +331,54 @@ input.txt{background:var(--panel-2);color:var(--paper);border:1px solid var(--li
       <p class="chartNote" id="chartNote">Здесь появятся ваши последние бои: зелёный — победа, жёлтый — рекорд.</p>
     </div>
 
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tabBtnArena" aria-selected="true">⚔️ Арена</button>
+      <button role="tab" id="tabBtnMini" aria-selected="false">🥷 Мини-игра</button>
+    </div>
+
+    <div class="tabPane" id="tabMini" hidden>
+      <div class="mini">
+        <div class="miniArt" aria-hidden="true">
+          <svg viewBox="0 0 320 150">
+            <defs>
+              <linearGradient id="mSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a1550"/><stop offset=".6" stop-color="#5a2430"/><stop offset="1" stop-color="#1a0c18"/></linearGradient>
+              <radialGradient id="mMoon"><stop offset="0" stop-color="#ffe6be"/><stop offset=".5" stop-color="#ffc88c" stop-opacity=".35"/><stop offset="1" stop-color="#ffc88c" stop-opacity="0"/></radialGradient>
+              <linearGradient id="mPil" x1="0" x2="1"><stop offset="0" stop-color="#8e1c18"/><stop offset=".4" stop-color="#ff6a4d"/><stop offset="1" stop-color="#7a1512"/></linearGradient>
+              <radialGradient id="mOrb"><stop offset="0" stop-color="#e6fbff"/><stop offset=".4" stop-color="#36c5ff"/><stop offset="1" stop-color="#36c5ff" stop-opacity="0"/></radialGradient>
+            </defs>
+            <rect width="320" height="150" fill="url(#mSky)"/>
+            <circle cx="250" cy="34" r="46" fill="url(#mMoon)"/>
+            <g fill="#ffaac8" opacity=".85"><ellipse cx="40" cy="20" rx="4" ry="2.2" transform="rotate(30 40 20)"/><ellipse cx="150" cy="40" rx="3" ry="1.8"/><ellipse cx="290" cy="110" rx="4" ry="2.2" transform="rotate(-20 290 110)"/><ellipse cx="210" cy="16" rx="3" ry="1.8"/></g>
+            <g stroke="#fff" stroke-opacity=".2" stroke-width="2"><line x1="120" y1="60" x2="170" y2="60"/><line x1="20" y1="120" x2="60" y2="120"/><line x1="260" y1="80" x2="310" y2="80"/></g>
+            <rect x="96" y="0" width="30" height="44" fill="url(#mPil)"/><rect x="96" y="106" width="30" height="44" fill="url(#mPil)"/>
+            <path d="M82 40 Q111 47 140 40 L137 52 Q111 56 85 52Z M82 110 Q111 103 140 110 L137 98 Q111 94 85 98Z" fill="#1a1418"/>
+            <rect x="214" y="0" width="30" height="84" fill="url(#mPil)"/><rect x="214" y="134" width="30" height="16" fill="url(#mPil)"/>
+            <path d="M200 80 Q229 87 258 80 L255 92 Q229 96 203 92Z M200 138 Q229 131 258 138 L255 126 Q229 122 203 126Z" fill="#1a1418"/>
+            <circle cx="172" cy="128" r="14" fill="url(#mOrb)"/>
+            <g fill="#ff9a3c" opacity=".55"><circle cx="30" cy="80" r="4"/><circle cx="42" cy="78" r="6"/></g>
+            <path d="M52 70 q-14 4 -24 -2 M52 74 q-14 8 -26 6" stroke="#2b56c9" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <circle cx="62" cy="76" r="13" fill="#1b1830" stroke="#ff6b1a" stroke-width="2"/>
+            <ellipse cx="64" cy="77" rx="8" ry="4" fill="#f7d2b0"/><circle cx="62" cy="77" r="1.6" fill="#111"/><circle cx="68" cy="77" r="1.6" fill="#111"/>
+            <rect x="49" y="68" width="26" height="4" fill="#2b56c9"/><rect x="61" y="67" width="8" height="5" fill="#d3dae3"/>
+          </svg>
+        </div>
+        <span class="label">Мини-игра</span>
+        <h2>Полёт сквозь врата</h2>
+        <p class="note" style="font-size:15px;color:var(--paper)">Ваша голова ведёт ниндзя. Опускаетесь в отжимании — он летит вниз, выжимаетесь — вверх. Пролетайте в проёмы врат (+1) и ловите синие сферы чакры (+2) — за ними придётся опуститься до конца или выжаться полностью. 5 врат подряд — комбо. Жизней 3.</p>
+        <div class="nums">
+          <div><b id="flyBestTxt">0</b><span>рекорд очков</span></div>
+          <div><b id="flyGames">0</b><span>игр сыграно</span></div>
+          <div><b id="flyRepsTxt">0</b><span>отжиманий в мини-игре</span></div>
+        </div>
+        <ol class="steps">
+          <li>Поставьте телефон <b>на пол перед собой</b>, экраном к лицу, в 1–1,5 метрах.</li>
+          <li>Встаньте в упор лёжа так, чтобы лицо было видно на экране.</li>
+          <li>Первые секунды сделайте пару отжиманий — игра запомнит, как высоко и низко ходит ваша голова.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="tabPane" id="tabArena">
     <div class="secHead"><h2>Соперник</h2><button class="linkbtn" id="openPics" style="padding:0;font-size:13px">🖼 Свои картинки</button></div>
     <div class="roster" id="roster" role="radiogroup" aria-label="Соперник"></div>
 
@@ -330,6 +408,7 @@ input.txt{background:var(--panel-2);color:var(--paper);border:1px solid var(--li
         <input class="txt" id="duelName" maxlength="20" placeholder="Например, Чемпион" autocomplete="off">
       </label>
       <button class="btn sky" id="startDuel">⚔️ Создать бой и позвать друга</button>
+    </div>
     </div>
 
     <div id="menuErr" class="err" hidden></div>
@@ -387,6 +466,32 @@ input.txt{background:var(--panel-2);color:var(--paper);border:1px solid var(--li
     <div class="in">
       <button class="btn primary" id="startCam"><span class="hex" id="ctaHex"><i>🍥</i></span><span id="ctaTxt">В бой</span></button>
       <button class="btn ghost" id="startManual">Без камеры — считать кнопкой</button>
+      <button class="btn primary" id="startFly" hidden><span class="hex" style="--c1:#ff6b1a;--c2:#5c2a06"><i>🥷</i></span><span>Играть</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ МИНИ-ИГРА ============ -->
+<section id="fly" class="screen" hidden>
+  <video id="flyCam" playsinline muted autoplay></video>
+  <canvas id="flyCv"></canvas>
+  <div class="flyHud">
+    <div class="flyBar">
+      <div><b id="flyScore">0</b><span>очки</span></div>
+      <div class="hearts" id="flyHearts">❤️❤️❤️</div>
+      <div class="r"><b id="flyReps">0</b><span>отжиманий</span></div>
+    </div>
+  </div>
+  <div class="status flyStatus"><div id="flyStatus">Включаю камеру…</div></div>
+  <div class="controls"><div class="inner"><button class="btn ghost quit" id="flyQuit" style="background:rgba(13,11,20,.7)">Выйти</button></div></div>
+  <div class="flyOver" id="flyOver" hidden>
+    <div class="box">
+      <span class="label">Мини-игра окончена</span>
+      <h2 id="flyOverTitle">Хороший полёт!</h2>
+      <div class="final" style="justify-content:center"><span class="a" id="flyOverScore">0</span></div>
+      <p class="note" id="flyOverText"></p>
+      <button class="btn primary" id="flyAgain">Ещё раз</button>
+      <button class="btn ghost" id="flyMenu">В меню</button>
     </div>
   </div>
 </section>
@@ -664,7 +769,7 @@ let selId = store.get('selHero', 'deku');
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function show(id){ for(const s of ['menu','battle','result']) $(s).hidden = s!==id; }
+function show(id){ for(const s of ['menu','battle','result','fly']) $(s).hidden = s!==id; }
 function fmt(sec){ sec=Math.max(0,Math.ceil(sec)); return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0'); }
 const diffK = () => parseFloat($('diff').value)||1;
 const heroById = id => HEROES.find(h=>h.id===id)||HEROES[0];
@@ -1123,6 +1228,318 @@ $('lbCopy').onclick=async()=>{
   catch(e){ $('lbLink').focus(); $('lbLink').select(); $('lbCopy').textContent='Выделено — скопируйте'; }
   setTimeout(()=>{ $('lbCopy').textContent='Скопировать'; },2500);
 };
+
+/* ===================== Вкладки меню ===================== */
+let menuTab=store.get('menuTab','arena');
+function setTab(t){
+  menuTab=t; store.set('menuTab',t);
+  $('tabBtnArena').setAttribute('aria-selected', t==='arena'); $('tabBtnMini').setAttribute('aria-selected', t==='mini');
+  $('tabArena').hidden = t!=='arena'; $('tabMini').hidden = t!=='mini';
+  $('startCam').hidden = t!=='arena'; $('startManual').hidden = t!=='arena'; $('startFly').hidden = t!=='mini';
+  renderFlyStats();
+}
+$('tabBtnArena').onclick=()=>setTab('arena');
+$('tabBtnMini').onclick=()=>setTab('mini');
+
+/* ===================== Мини-игра «Полёт сквозь врата» ===================== */
+// Голова игрока (нос) ведёт ниндзя по высоте. Сначала запоминаем, в каких пределах ходит голова при отжимании,
+// и растягиваем этот диапазон на высоту экрана — так играть удобно при любой установке телефона.
+let flyStats=store.get('fly',{best:0, games:0, reps:0});
+function renderFlyStats(){ $('flyBestTxt').textContent=flyStats.best; $('flyGames').textContent=flyStats.games; $('flyRepsTxt').textContent=flyStats.reps; }
+const fly={ on:false, raf:0, phase:'cal', W:0, H:0, dpr:1, y:null, rawLo:null, rawHi:null, calT:0, seenT:0, lastT:0, t:0,
+  gates:[], nextGate:0, score:0, lives:3, inv:0, reps:0, counter:null, lastVideoT:-1, statusT:0, trail:[], pops:[], manualY:null, manualT:0,
+  orbs:[], orbDue:false, parts:[], petals:[], lines:[], combo:0, shake:0, hurt:0, banner:null, readyT:0, vy:0, prevY:null, scroll:0 };
+
+function flyResize(){
+  const c=$('flyCv'); fly.dpr=Math.min(2,window.devicePixelRatio||1);
+  fly.W=c.clientWidth; fly.H=c.clientHeight; c.width=fly.W*fly.dpr; c.height=fly.H*fly.dpr;
+}
+window.addEventListener('resize',()=>{ if(fly.on) flyResize(); });
+function flySetStatus(t,warn){ const s=$('flyStatus'); s.textContent=t; s.className=warn?'warn':''; }
+function flyHud(){ $('flyScore').textContent=fly.score; $('flyReps').textContent=fly.reps; $('flyHearts').textContent='❤️'.repeat(fly.lives)+'🖤'.repeat(3-fly.lives); }
+
+async function startFly(){
+  const pending=requestCameraNow(); askPersist();
+  $('menuErr').hidden=true; $('openSafari').hidden=true;
+  show('fly'); $('flyOver').hidden=true; flyResize(); keepAwake();
+  flySetStatus('Включаю камеру…');
+  try{
+    await startCamera(pending);
+    const v=$('flyCam'); v.srcObject=stream; await v.play();
+    flySetStatus('Загружаю распознавание позы (первый раз до 10 секунд)…');
+    await loadLandmarker();
+  }catch(e){
+    flyStop(); show('menu');
+    const denied=e && e.name==='NotAllowedError';
+    $('openSafari').hidden=!isStandalone();
+    $('menuErr').textContent = isStandalone() ? 'В режиме ярлыка iPhone не даёт игре камеру. Нажмите кнопку ниже — игра откроется в Safari.'
+      : denied ? 'Браузер запретил камеру. На iPhone: Настройки → Приложения → Safari → Камера → «Спрашивать», потом обновите страницу.'
+      : 'Не получилось запустить камеру: '+(e&&e.message||e);
+    $('menuErr').hidden=false; return;
+  }
+  flyReset();
+}
+function flyReset(){
+  Object.assign(fly,{ on:true, phase:'cal', y:null, rawLo:null, rawHi:null, calT:0, seenT:0, lastT:performance.now(), t:0,
+    gates:[], nextGate:1.2, score:0, lives:3, inv:0, reps:0, trail:[], pops:[], lastVideoT:-1,
+    orbs:[], orbDue:false, parts:[], combo:0, shake:0, hurt:0, banner:null, readyT:0, vy:0, prevY:null });
+  fly.counter=new PushupCounter(SENS[$('sens').value]||SENS.normal);
+  $('flyOver').hidden=true; flyHud();
+  flySetStatus('Встаньте в упор лёжа лицом к телефону и сделайте 2 отжимания');
+  cancelAnimationFrame(fly.raf); fly.raf=requestAnimationFrame(flyLoop);
+}
+function flyStop(){ fly.on=false; cancelAnimationFrame(fly.raf); fly.raf=0; $('flyCam').srcObject=null; stopCamera(); try{wakeLock&&wakeLock.release();}catch(e){} wakeLock=null; }
+
+// Где на экране находится голова (в пикселях экрана), с учётом того, что видео растянуто «cover».
+function headScreenY(lm){
+  const v=$('flyCam'), vw=v.videoWidth||640, vh=v.videoHeight||480;
+  const s=Math.max(fly.W/vw, fly.H/vh), dispH=vh*s, offY=(dispH-fly.H)/2;
+  let p=lm[0];
+  if(!p || (p.visibility??1)<.5){ const a=lm[11], b=lm[12]; if(!a||!b) return null; p={y:(a.y+b.y)/2-0.08}; }
+  return p.y*dispH-offY;
+}
+const FLY_TOP=()=>fly.H*0.2, FLY_BOT=()=>fly.H*0.8;
+function flyNorm(raw){ const r=Math.max(1,fly.rawHi-fly.rawLo); return Math.max(-0.1,Math.min(1.1,(raw-fly.rawLo)/r)); }
+
+function flyLoop(now){
+  fly.raf=requestAnimationFrame(flyLoop);
+  const dt=Math.min(0.1,(now-fly.lastT)/1000); fly.lastT=now;
+  let raw=null, seen=false;
+  const v=$('flyCam');
+  if(landmarker && v.readyState>=2 && v.currentTime!==fly.lastVideoT){
+    fly.lastVideoT=v.currentTime;
+    let res; try{ res=landmarker.detectForVideo(v, now); }catch(e){}
+    const lm=res&&res.landmarks?.[0], wlm=res&&res.worldLandmarks?.[0];
+    if(lm){ raw=headScreenY(lm); seen=raw!=null; }
+    const {angle}=elbowAngleFromPose(lm,wlm);
+    if(fly.counter.update(angle, now) && fly.phase==='play'){
+      fly.reps++; totalReps++; store.set('total',totalReps); flyHud();
+    }
+    if(seen) fly.seenT=now; else raw=null;
+    fly.rawSample=raw;
+  } else raw=fly.rawSample??null;
+  if(fly.manualY!=null && now-fly.manualT<1500){ raw=fly.manualY; seen=true; fly.seenT=now; }
+
+  // Калибровка: первые ~4 секунды запоминаем, где голова наверху и внизу.
+  if(raw!=null){
+    if(fly.rawLo==null){ fly.rawLo=fly.rawHi=raw; }
+    fly.rawLo=Math.min(fly.rawLo,raw); fly.rawHi=Math.max(fly.rawHi,raw);
+  }
+  if(fly.phase==='cal' && raw!=null){
+    fly.calT+=dt;
+    const range=fly.rawHi-fly.rawLo;
+    if(fly.calT>4 && range>fly.H*0.05){ fly.phase='ready'; fly.readyT=3; flySetStatus('Готово! Пролетайте в проёмы и собирайте синие сферы чакры'); }
+    else if(fly.calT>9){ const c=(fly.rawLo+fly.rawHi)/2; fly.rawLo=Math.min(fly.rawLo,c-fly.H*0.05); fly.rawHi=Math.max(fly.rawHi,c+fly.H*0.05); fly.phase='ready'; fly.readyT=3; flySetStatus('Готово!'); }
+    else if(now-fly.statusT>500){ fly.statusT=now; flySetStatus(`Настраиваю высоту: сделайте 2 отжимания… ${Math.max(0,Math.ceil(4-fly.calT))}`); }
+  }
+  // Положение ниндзя: растягиваем диапазон головы на экран и сглаживаем.
+  if(raw!=null && fly.rawHi>fly.rawLo){
+    const target=FLY_TOP()+flyNorm(raw)*(FLY_BOT()-FLY_TOP());
+    fly.y = fly.y==null ? target : fly.y+(target-fly.y)*(1-Math.exp(-dt/0.06));
+  }
+  if(fly.y==null) fly.y=fly.H/2;
+  fly.vy = fly.prevY==null ? 0 : fly.vy+((fly.y-fly.prevY)/Math.max(dt,0.001)-fly.vy)*0.2; fly.prevY=fly.y;
+  if(fly.phase==='ready'){
+    const before=Math.ceil(fly.readyT); fly.readyT-=dt; const after=Math.ceil(fly.readyT);
+    if(after!==before && after>0){ beep('tick'); }
+    if(fly.readyT<=0){ fly.phase='play'; fly.banner={txt:'ЛЕТИМ!', t:0}; beep('vs'); }
+  }
+  flyAmbient(dt);
+
+  const lost = now-fly.seenT>1000;
+  if(fly.phase==='play' && fly.lives>0){
+    if(lost){ if(now-fly.statusT>500){ fly.statusT=now; flySetStatus('Не вижу лица — пауза. Встаньте так, чтобы лицо было на экране',true); } }
+    else{
+      if(now-fly.statusT>3000){ fly.statusT=now; flySetStatus(''); }
+      fly.t+=dt; flyStep(dt);
+    }
+  }
+  flyDraw(now);
+}
+
+const flyR=()=>Math.max(18,fly.W*0.05);
+function flyBurst(x,y,color,n=14,sp=160){
+  for(let i=0;i<n;i++){ const a=Math.random()*Math.PI*2, v=sp*(0.4+Math.random()*0.8);
+    fly.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:0.5+Math.random()*0.4,t:0,c:color,r:2+Math.random()*3}); }
+}
+// Фон: лепестки сакуры и линии скорости — двигаются всегда, даже на паузе медленно.
+function flyAmbient(dt){
+  const W=fly.W, H=fly.H, fast=fly.phase==='play';
+  if(fly.petals.length<16 && Math.random()<dt*6) fly.petals.push({x:Math.random()*W*1.2, y:-10, r:3+Math.random()*4, a:Math.random()*6, s:0.5+Math.random()});
+  for(const p of fly.petals){ p.y+=(30+20*p.s)*dt; p.x-=(fast?90:20)*p.s*dt; p.a+=dt*2*p.s; }
+  fly.petals=fly.petals.filter(p=>p.y<H+10 && p.x>-10);
+  if(fast && Math.random()<dt*10) fly.lines.push({x:W+20, y:Math.random()*H, len:40+Math.random()*90, v:W*(1.2+Math.random())});
+  for(const l of fly.lines) l.x-=l.v*dt;
+  fly.lines=fly.lines.filter(l=>l.x+l.len>0);
+  for(const p of fly.parts){ p.t+=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=200*dt; }
+  fly.parts=fly.parts.filter(p=>p.t<p.life);
+  if(fly.shake>0) fly.shake-=dt; if(fly.hurt>0) fly.hurt-=dt;
+  if(fly.banner && (fly.banner.t+=dt)>1.3) fly.banner=null;
+}
+function flyStep(dt){
+  const W=fly.W, speed=W*(0.32+Math.min(0.25,fly.t/300)), gw=Math.max(50,W*0.14);
+  fly.nextGate-=dt;
+  const interval=Math.max(1.5, 2.3-fly.t/120);
+  // Сфера чакры — между вратами, высоко или низко: за ней надо полностью выжаться или опуститься.
+  if(fly.orbDue && fly.nextGate<=interval/2){
+    fly.orbDue=false;
+    if(Math.random()<0.7){ const span=FLY_BOT()-FLY_TOP(); fly.orbs.push({x:W+20, y:FLY_TOP()+(Math.random()<.5?0.1:0.9)*span, taken:false}); }
+  }
+  if(fly.nextGate<=0){
+    const span=FLY_BOT()-FLY_TOP(), gap=Math.max(120, span*(0.42-Math.min(0.1,fly.t/900)));
+    const r=[0.12,0.5,0.88][Math.floor(Math.random()*3)]+(Math.random()-.5)*0.12;
+    const c=FLY_TOP()+Math.max(0.08,Math.min(0.92,r))*span;
+    fly.gates.push({x:W+10, w:gw, top:c-gap/2, bot:c+gap/2, passed:false, hit:false});
+    fly.nextGate=interval; fly.orbDue=true;
+  }
+  const px=W*0.28, R=flyR();
+  for(const g of fly.gates){
+    g.x-=speed*dt;
+    const overlap = px+R*0.75>g.x && px-R*0.75<g.x+g.w;
+    if(overlap && !g.hit && fly.inv<=0 && (fly.y-R*0.75<g.top || fly.y+R*0.75>g.bot)){
+      g.hit=true; fly.lives--; fly.inv=1.4; fly.combo=0; fly.shake=0.35; fly.hurt=0.3; flyHud(); beep('lose'); buzz(200);
+      flyBurst(px,fly.y,'#ff3b4e',20,220);
+      if(fly.lives<=0){ flyGameOver(); return; }
+    }
+    if(!g.passed && g.x+g.w<px-R){ g.passed=true; if(!g.hit){
+      fly.score++; fly.combo++; flyHud(); beep('hit'); buzz(25);
+      flyBurst(g.x+g.w/2,(g.top+g.bot)/2,'#ffd23f',12,140);
+      fly.pops.push({x:px,y:fly.y-R*1.6,t:0,txt:'+1',c:'#ffd23f'});
+      if(fly.combo>0 && fly.combo%5===0){ fly.banner={txt:`КОМБО ×${fly.combo}!`, t:0}; beep('win'); }
+      else if(fly.score%10===0){ fly.banner={txt:'БЫСТРЕЕ!', t:0}; }
+    } }
+  }
+  for(const o of fly.orbs){
+    o.x-=speed*dt;
+    if(!o.taken && Math.hypot(o.x-px,o.y-fly.y)<R*1.5){
+      o.taken=true; fly.score+=2; flyHud(); beep('tick'); buzz(30);
+      flyBurst(o.x,o.y,'#36c5ff',18,180); fly.pops.push({x:o.x,y:o.y-R,t:0,txt:'+2',c:'#36c5ff'});
+    }
+  }
+  fly.gates=fly.gates.filter(g=>g.x+g.w>-30);
+  fly.orbs=fly.orbs.filter(o=>o.x>-30 && !o.taken);
+  fly.scroll+=speed*dt;
+  if(fly.inv>0) fly.inv-=dt;
+}
+
+function flyHex(g,x,y,r){ g.beginPath(); for(let i=0;i<6;i++){ const a=Math.PI/3*i-Math.PI/2; const X=x+r*Math.cos(a), Y=y+r*1.06*Math.sin(a); i?g.lineTo(X,Y):g.moveTo(X,Y); } g.closePath(); }
+// Тории: красные столбы с чёрной изогнутой перекладиной у края проёма.
+function flyPillar(g,x,w,y0,y1,capY,capDir){
+  const grad=g.createLinearGradient(x,0,x+w,0);
+  grad.addColorStop(0,'#8e1c18'); grad.addColorStop(.3,'#e0412f'); grad.addColorStop(.55,'#ff6a4d'); grad.addColorStop(1,'#7a1512');
+  g.fillStyle=grad; g.fillRect(x,y0,w,y1-y0);
+  g.fillStyle='rgba(0,0,0,.18)'; for(let yy=Math.min(y0,y1);yy<Math.max(y0,y1);yy+=46) g.fillRect(x,yy,w,4);
+  // перекладина «касаги»: шире столба, концы загнуты
+  const ext=w*0.55, th=Math.max(12,w*0.26), cy=capY;
+  g.fillStyle='#1a1418';
+  g.beginPath();
+  g.moveTo(x-ext, cy-capDir*th*0.2); g.quadraticCurveTo(x+w/2, cy+capDir*th*0.35, x+w+ext, cy-capDir*th*0.2);
+  g.lineTo(x+w+ext*0.85, cy+capDir*th); g.quadraticCurveTo(x+w/2, cy+capDir*th*1.25, x-ext*0.85, cy+capDir*th); g.closePath(); g.fill();
+  g.fillStyle='#ffd23f'; g.fillRect(x-ext*0.4, cy+capDir*th*0.95-(capDir<0?3:0), w+ext*0.8, 3);
+  g.fillStyle='#c22a22'; g.fillRect(x-ext*0.5, cy+capDir*(th+8)-(capDir<0?7:0), w+ext, 7);
+}
+function flyDraw(now){
+  const c=$('flyCv'), g=c.getContext('2d'), W=fly.W, H=fly.H;
+  g.setTransform(fly.dpr,0,0,fly.dpr,0,0); g.clearRect(0,0,W,H);
+  if(fly.shake>0){ const k=fly.shake*22; g.translate((Math.random()-.5)*k,(Math.random()-.5)*k); }
+  // Атмосфера: вечернее небо поверх камеры, сверху и снизу темнее.
+  const sky=g.createLinearGradient(0,0,0,H);
+  sky.addColorStop(0,'rgba(60,20,90,.55)'); sky.addColorStop(.35,'rgba(255,107,26,.08)'); sky.addColorStop(.7,'rgba(255,107,26,.06)'); sky.addColorStop(1,'rgba(20,8,30,.7)');
+  g.fillStyle=sky; g.fillRect(-20,-20,W+40,H+40);
+  // Огромная луна на фоне, медленно уплывает.
+  const mx=W*0.78-(fly.scroll*0.02)%(W*1.4), my=H*0.17;
+  const moon=g.createRadialGradient(mx,my,4,mx,my,W*0.22); moon.addColorStop(0,'rgba(255,230,190,.55)'); moon.addColorStop(.45,'rgba(255,200,140,.18)'); moon.addColorStop(1,'rgba(255,200,140,0)');
+  g.fillStyle=moon; g.beginPath(); g.arc(mx,my,W*0.22,0,7); g.fill();
+  // Линии скорости.
+  g.strokeStyle='rgba(255,255,255,.18)'; g.lineWidth=2;
+  for(const l of fly.lines){ g.beginPath(); g.moveTo(l.x,l.y); g.lineTo(l.x+l.len,l.y); g.stroke(); }
+  // Лепестки сакуры.
+  for(const p of fly.petals){ g.save(); g.translate(p.x,p.y); g.rotate(p.a); g.fillStyle='rgba(255,170,200,.85)'; g.beginPath(); g.ellipse(0,0,p.r,p.r*0.55,0,0,7); g.fill(); g.restore(); }
+
+  for(const q of fly.gates){
+    flyPillar(g,q.x,q.w,0,q.top,q.top,-1);
+    flyPillar(g,q.x,q.w,q.bot,H+20,q.bot,1);
+    if(!q.passed){ g.fillStyle='rgba(255,210,63,.07)'; g.fillRect(q.x,q.top,q.w,q.bot-q.top); }
+  }
+  // Сферы чакры.
+  for(const o of fly.orbs){
+    const R=flyR()*0.6, pulse=1+Math.sin(now/150)*0.12;
+    const og=g.createRadialGradient(o.x,o.y,1,o.x,o.y,R*2.4*pulse); og.addColorStop(0,'rgba(180,240,255,.95)'); og.addColorStop(.35,'rgba(54,197,255,.8)'); og.addColorStop(1,'rgba(54,197,255,0)');
+    g.fillStyle=og; g.beginPath(); g.arc(o.x,o.y,R*2.4*pulse,0,7); g.fill();
+    g.strokeStyle='rgba(255,255,255,.85)'; g.lineWidth=2; g.beginPath(); g.arc(o.x,o.y,R*0.75,now/200,now/200+4); g.stroke();
+  }
+
+  // Ниндзя.
+  const px=W*0.28, R=flyR(), y=fly.y, tilt=Math.max(-0.5,Math.min(0.5,fly.vy/900));
+  fly.trail.push({x:px,y}); if(fly.trail.length>18) fly.trail.shift();
+  // хвосты повязки
+  g.strokeStyle='#2b56c9'; g.lineWidth=R*0.28; g.lineCap='round';
+  for(const off of [0,1]){
+    g.beginPath(); g.moveTo(px-R*0.6,y-R*0.15);
+    for(let i=1;i<=6;i++){ const tp=fly.trail[Math.max(0,fly.trail.length-1-i*2)]||{y}; const dy=Math.max(-R,Math.min(R,(tp.y-y)*0.5));
+      g.lineTo(px-R*0.6-i*R*0.38, y+dy-R*0.15+Math.sin(now/80+i+off*1.7)*R*0.22+off*R*0.25); }
+    g.stroke();
+  }
+  // огненный след
+  fly.trail.forEach((p,i)=>{ const k=i/fly.trail.length; g.fillStyle=`rgba(255,${120+k*90|0},40,${k*0.45})`; g.beginPath(); g.arc(px-(fly.trail.length-i)*7,y+Math.max(-R*2,Math.min(R*2,p.y-y)),R*0.5*k,0,7); g.fill(); });
+  const blink = fly.inv>0 && Math.floor(now/110)%2===0;
+  if(!blink){
+    g.save(); g.translate(px,y); g.rotate(tilt);
+    const aura=g.createRadialGradient(0,0,R*0.5,0,0,R*2); aura.addColorStop(0,'rgba(255,140,40,.5)'); aura.addColorStop(1,'rgba(255,140,40,0)');
+    g.fillStyle=aura; g.beginPath(); g.arc(0,0,R*2,0,7); g.fill();
+    // голова в маске
+    g.fillStyle='#1b1830'; g.beginPath(); g.arc(0,0,R,0,7); g.fill();
+    g.lineWidth=2.5; g.strokeStyle='#ff6b1a'; g.stroke();
+    g.fillStyle='#f7d2b0'; g.beginPath(); g.ellipse(R*0.18,R*0.05,R*0.62,R*0.3,0,0,7); g.fill();
+    g.fillStyle='#111'; g.beginPath(); g.ellipse(R*0.02,R*0.05,R*0.11,R*0.15,0,0,7); g.ellipse(R*0.42,R*0.05,R*0.11,R*0.15,0,0,7); g.fill();
+    g.fillStyle='#fff'; g.beginPath(); g.arc(R*0.05,R*0.0,R*0.04,0,7); g.arc(R*0.45,R*0.0,R*0.04,0,7); g.fill();
+    // повязка с пластиной
+    g.fillStyle='#2b56c9'; g.fillRect(-R*0.98,-R*0.5,R*1.96,R*0.3);
+    g.fillStyle='#d3dae3'; g.fillRect(-R*0.1,-R*0.55,R*0.62,R*0.4); g.strokeStyle='#8d97a5'; g.lineWidth=1.2; g.strokeRect(-R*0.1,-R*0.55,R*0.62,R*0.4);
+    g.restore();
+  }
+  // Искры.
+  for(const p of fly.parts){ g.globalAlpha=1-p.t/p.life; g.fillStyle=p.c; g.beginPath(); g.arc(p.x,p.y,p.r,0,7); g.fill(); }
+  g.globalAlpha=1;
+  // Всплывающие очки.
+  g.textAlign='center'; g.font=`${Math.round(R*1.1)}px "Dela Gothic One", sans-serif`;
+  fly.pops=fly.pops.filter(p=>(p.t+=1/60)<0.8);
+  for(const p of fly.pops){ g.globalAlpha=1-p.t/0.8; g.fillStyle=p.c||'#36e38a'; g.fillText(p.txt,p.x+20,p.y-p.t*60); }
+  g.globalAlpha=1;
+  // Полоса калибровки.
+  if(fly.phase==='cal'){
+    g.strokeStyle='rgba(255,210,63,.6)'; g.setLineDash([6,8]); g.lineWidth=2;
+    g.beginPath(); g.moveTo(0,FLY_TOP()); g.lineTo(W,FLY_TOP()); g.moveTo(0,FLY_BOT()); g.lineTo(W,FLY_BOT()); g.stroke(); g.setLineDash([]);
+    g.fillStyle='rgba(255,210,63,.85)'; g.font='600 13px Rubik, sans-serif'; g.textAlign='left';
+    g.fillText('ВВЕРХ',12,FLY_TOP()-8); g.fillText('ВНИЗ',12,FLY_BOT()+20);
+  }
+  // Крупные надписи: отсчёт, «Летим!», комбо.
+  const big=(txt,t,color)=>{ const s=t<0.15?2-t/0.15:1; g.save(); g.translate(W/2,H*0.42); g.scale(s,s); g.globalAlpha=Math.min(1,1.6-t);
+    g.font=`${Math.round(W*0.13)}px "Dela Gothic One", sans-serif`; g.textAlign='center'; g.lineWidth=8; g.strokeStyle='#1a0a00'; g.strokeText(txt,0,0); g.fillStyle=color; g.fillText(txt,0,0); g.restore(); };
+  if(fly.phase==='ready') big(String(Math.ceil(fly.readyT)), 1-(fly.readyT%1||1), '#fff');
+  if(fly.banner) big(fly.banner.txt, fly.banner.t, '#ffd23f');
+  // Комбо в углу.
+  if(fly.combo>=2 && fly.phase==='play'){ g.font='16px "Dela Gothic One", sans-serif'; g.textAlign='right'; g.fillStyle='#ffd23f'; g.fillText(`комбо ×${fly.combo}`, W-14, H*0.17); }
+  // Красная вспышка при ударе.
+  if(fly.hurt>0){ g.setTransform(fly.dpr,0,0,fly.dpr,0,0); g.fillStyle=`rgba(255,40,60,${fly.hurt})`; g.fillRect(0,0,W,H); }
+}
+
+function flyGameOver(){
+  fly.phase='over';
+  const isBest=fly.score>flyStats.best;
+  flyStats={best:Math.max(flyStats.best,fly.score), games:flyStats.games+1, reps:flyStats.reps+fly.reps}; store.set('fly',flyStats);
+  $('flyOverTitle').textContent = isBest ? 'Новый рекорд!' : fly.score>=10 ? 'Отличный полёт!' : 'Хороший полёт!';
+  $('flyOverScore').textContent=fly.score;
+  $('flyOverText').textContent=`Очков: ${fly.score}. Отжиманий за игру: ${fly.reps}. Рекорд: ${flyStats.best}.`;
+  $('flyOver').hidden=false; flySetStatus('');
+  beep(isBest?'win':'lose');
+}
+$('flyCv').addEventListener('pointerdown',e=>{ fly.manualY=null; });
+$('flyCv').addEventListener('pointermove',e=>{ if(e.buttons){ fly.manualY = fly.rawHi>fly.rawLo ? fly.rawLo+(e.clientY-FLY_TOP())/(FLY_BOT()-FLY_TOP())*(fly.rawHi-fly.rawLo) : e.clientY; fly.manualT=performance.now(); } });
+$('startFly').onclick=startFly;
+$('flyAgain').onclick=()=>{ beep('tick'); flyReset(); };
+$('flyQuit').onclick=$('flyMenu').onclick=()=>{ flyStop(); renderMenu(); renderFlyStats(); show('menu'); };
+setTab(menuTab);
 
 $('startCam').onclick=()=>{ const cam=requestCameraNow(); askPersist(); startBattle('cam', cam); };
 $('startManual').onclick=()=>startBattle('manual');
