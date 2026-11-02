@@ -178,16 +178,16 @@ input.txt{background:var(--panel-2);color:var(--paper);border:1px solid var(--li
 .timer{font:26px var(--display);font-variant-numeric:tabular-nums;text-align:center;min-width:76px}
 .timer.low{color:var(--foe);animation:pulse .5s infinite alternate}
 .scoreRow{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px}
-.scoreRow b{font:30px/1 var(--display);font-variant-numeric:tabular-nums;min-width:1.4em}
+.scoreRow b{font:20px/1 var(--display);font-variant-numeric:tabular-nums;min-width:1.4em}
 .scoreRow b.me{color:var(--me)} .scoreRow b.foe{color:var(--foe);text-align:right}
 .tug{position:relative;height:12px;border-radius:6px;background:var(--foe);overflow:hidden}
 .tug i{position:absolute;inset:0 auto 0 0;width:50%;background:var(--me);transition:width .3s ease-out}
 .tug::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;background:rgba(255,255,255,.8)}
 
-.arena{position:absolute;left:0;right:0;top:24%;height:32%;display:grid;place-items:center;z-index:2;pointer-events:none}
+.arena{position:absolute;left:0;right:0;top:calc(150px + env(safe-area-inset-top,0px));height:120px;display:grid;place-items:center;z-index:2;pointer-events:none}
 .hero{position:relative;display:grid;place-items:center}
-.hero .aura{position:absolute;width:min(56vw,260px);height:min(56vw,260px);border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--c1) 55%,transparent),transparent 65%);animation:aura 2.2s ease-in-out infinite}
-.hero .hex{--s:min(38vw,170px);padding:5px;filter:drop-shadow(0 12px 24px rgba(0,0,0,.6))}
+.hero .aura{position:absolute;width:min(30vw,140px);height:min(30vw,140px);border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--c1) 55%,transparent),transparent 65%);animation:aura 2.2s ease-in-out infinite}
+.hero .hex{--s:min(20vw,88px);padding:3px;filter:drop-shadow(0 8px 16px rgba(0,0,0,.6))}
 .hero .hex{transform-origin:50% 100%}
 .hero.idle .hex{animation:breathe 2.4s ease-in-out infinite}
 .hero.push .hex{animation:push .45s ease-in-out}
@@ -195,9 +195,9 @@ input.txt{background:var(--panel-2);color:var(--paper);border:1px solid var(--li
 .hero.dead .hex{animation:die .9s ease-in forwards}
 .hero.gloat .hex{animation:gloat .8s ease-in-out 2}
 .bubble{position:absolute;top:-8px;left:58%;background:var(--paper);color:var(--ink);font:600 14px var(--body);padding:8px 12px;border-radius:14px 14px 14px 4px;white-space:nowrap;animation:bubble 1.8s ease-out forwards;z-index:2}
-.slash{position:absolute;width:min(70vw,340px);height:10px;border-radius:5px;background:linear-gradient(90deg,transparent,#fff,var(--gold),transparent);opacity:0;transform:rotate(-30deg) scaleX(.2)}
+.slash{position:absolute;width:min(36vw,170px);height:10px;border-radius:5px;background:linear-gradient(90deg,transparent,#fff,var(--gold),transparent);opacity:0;transform:rotate(-30deg) scaleX(.2)}
 .slash.go{animation:slash .3s ease-out}
-.pop{position:absolute;font:40px var(--display);animation:float 1s ease-out forwards}
+.pop{position:absolute;font:28px var(--display);animation:float 1s ease-out forwards}
 .pop.me{color:var(--me);text-shadow:0 3px 0 #0b4d2a}
 .pop.foe{color:var(--foe);text-shadow:0 3px 0 #4d0b10;font-size:24px}
 .flash{position:absolute;inset:0;opacity:0;z-index:1;pointer-events:none;background:var(--me)}
